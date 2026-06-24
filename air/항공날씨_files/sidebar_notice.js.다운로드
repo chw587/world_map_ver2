@@ -1,0 +1,104 @@
+/* ------------------------------------------------------------------------------
+ *
+ *  # Sidebar nav notice
+ *
+ *  Demo JS code for amos-GW.html page
+ *
+ * ---------------------------------------------------------------------------- */
+
+
+// Setup module
+// ------------------------------
+
+/* 모바일 메뉴 레이어 열기 */
+function openNav() {
+  document.getElementById("mobileMenu").style.width = "300px";
+  document.getElementById("mobileMenu").style.zIndex = "3000";
+  document.getElementById("background-overlay").style.opacity = "1";
+  document.getElementById("background-overlay").style.zIndex = "2000";
+  document.getElementById("background-overlay").style.visibility = "visible";
+}
+
+function closeNav() {
+  document.getElementById("mobileMenu").style.width = "0";
+  document.getElementById("mobileMenu").style.zIndex = "0";
+  document.getElementById("background-overlay").style.opacity = "0";
+  document.getElementById("background-overlay").style.zIndex = "-1";
+  document.getElementById("background-overlay").style.visibility = "hidden";
+}
+
+function openSide() {
+  document.getElementById("monitoring-sidebar").style.width = "305px";
+}
+
+function closeSide() {
+  document.getElementById("monitoring-sidebar").style.width = "0";
+}
+
+function openGisSide() {
+  document.getElementById("gis-sidebar").style.width = "305px";
+}
+
+function closeGisSide() {
+  document.getElementById("gis-sidebar").style.width = "0";
+}
+
+
+/* lnb */
+(function($){
+  
+  var lnbUI = {
+    click : function (target, speed) {
+      var _self = this,
+          $target = $(target);
+      _self.speed = speed || 300;
+      
+      $target.each(function(){
+        if(findChildren($(this))) {
+          return;
+        }
+        $(this).addClass('noDepth');
+      });
+      
+      function findChildren(obj) {
+        return obj.find('> ul').length > 0;
+      }
+      
+      $target.on('click','a', function(e){
+          e.stopPropagation();
+          var $this = $(this),
+              $depthTarget = $this.next(),
+              $siblings = $this.parent().siblings();
+        
+        $this.parent('li').find('ul li').removeClass('on');
+        $siblings.removeClass('on');
+        $siblings.find('ul').fadeOut();
+        
+        if($depthTarget.css('display') == 'none') {
+          _self.activeOn($this);
+          $depthTarget.fadeIn();
+        } 
+        else {
+          $depthTarget.fadeOut();
+          _self.activeOff($this);
+        }
+        
+      })
+      
+    },
+    activeOff : function($target) {
+      $target.parent().removeClass('on');
+    },
+    activeOn : function($target) {
+      $target.parent().addClass('on');
+    }
+  };
+  
+  
+  // Call lnbUI
+  $(function(){
+    lnbUI.click('#lnb li', 300)
+  });
+  
+  
+}(jQuery));

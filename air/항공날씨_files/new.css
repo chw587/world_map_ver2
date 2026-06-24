@@ -1,0 +1,1335 @@
+.page-wrap {
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.container {
+    display: flex;
+    flex-grow: 1;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.sub-info {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.stopover-box {
+    display: none;
+}
+
+/* ==================================================== */
+.airportweather-world-label {
+    padding: 0px !important;
+    align-content: center;
+}
+
+.world_map_wrap {
+    display: flex;
+    position: absolute;
+    top: 0;
+    left: -9999px;
+    gap: 16px;
+    width: 100%;
+    height: 300px;
+
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.world_map_wrap.is-open {
+    position: relative;
+    top: auto;
+    left: auto;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+.world_map_wrap .gis-map-container {
+    position: relative;
+    width: 100%;
+    min-height: 0px;
+    height: 300px;
+    border: 1px solid #c8d6e5;
+    border-radius: 8px;
+    overflow: hidden;
+
+    /* map_img */
+    background-image: url("../img/map.webp");
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position:  center center;
+}
+
+.world_map_wrap .gis-map-container .point {
+    position: absolute;
+    width: 12px;
+    height: 12px;
+    border-radius: 999px;
+    border: 3px solid #757575;
+    background-color: #ddd;
+}
+
+.world_map_wrap .gis-map-container .start_point,
+.world_map_wrap .gis-map-container .end_point {
+    background-color: red;
+}
+
+.world_map_wrap .gis-map-container .ol-viewport,
+.world_map_wrap .gis-map-container canvas {
+    max-width: none !important;
+}
+
+.world_map_wrap .gis-map-badge {
+    position: absolute;
+    z-index: 5;
+    top: 14px;
+    left: 52px;
+    padding: 9px 13px;
+    border: 1px solid rgba(27, 65, 107, .16);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, .95);
+    box-shadow: 0 8px 20px rgba(22, 48, 80, .15);
+    color: #183b63;
+    font-size: 13px;
+    font-weight: 800;
+    line-height: 1.2;
+    pointer-events: none;
+}
+
+.world_map_wrap .gis-layer-control {
+    position: absolute;
+    z-index: 6;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    border: 1px solid rgba(27, 65, 107, .14);
+    border-radius: 7px;
+    background: rgba(255, 255, 255, .92);
+    box-shadow: 0 8px 20px rgba(22, 48, 80, .13);
+}
+
+.world_map_wrap .gis-layer-control button {
+    min-width: 50px;
+    height: 26px;
+    padding: 0 9px;
+    border: 0;
+    border-radius: 5px;
+    background: transparent;
+    color: #4b5563;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.world_map_wrap .gis-layer-control button.active {
+    background: #2563eb;
+    color: #fff;
+    box-shadow: 0 4px 10px rgba(37, 99, 235, .24);
+}
+
+.world_map_wrap .gis-popup {
+    position: absolute;
+    min-width: 150px;
+    padding: 9px 11px;
+    border: 1px solid rgba(31, 41, 55, .14);
+    border-radius: 6px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, .18);
+    color: #1f2937;
+    font-size: 13px;
+    line-height: 1.45;
+    transform: translate(-50%, calc(-100% - 14px));
+    white-space: nowrap;
+}
+
+.world_map_wrap .gis-popup:after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -7px;
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-right: 1px solid rgba(31, 41, 55, .14);
+    border-bottom: 1px solid rgba(31, 41, 55, .14);
+    transform: translateX(-50%) rotate(45deg);
+}
+
+.world_map_wrap .ol-control button {
+    background-color: rgba(255, 255, 255, .94);
+    color: #1f2937;
+    border: 1px solid rgba(27, 65, 107, .18);
+    box-shadow: 0 2px 8px rgba(22, 48, 80, .12);
+}
+
+.world_map_wrap .ol-control button:hover,
+.world_map_wrap .ol-control button:focus {
+    background-color: #fff;
+    color: #0f172a;
+}
+
+.world_map_wrap .ol-attribution,
+.world_map_wrap .ol-scale-line {
+    border-radius: 6px 0 0 0;
+    background: rgba(255, 255, 255, .84);
+}
+
+@media (max-width: 768px) {
+    .world_map_wrap .gis-map-container {
+        min-height: 320px;
+        height: 62vw;
+    }
+
+    .world_map_wrap .gis-layer-control {
+        top: auto;
+        left: 12px;
+        right: auto;
+        bottom: 12px;
+    }
+}
+
+.world-map-list {
+    display: flex;
+    width: 30%;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    flex-direction: column;
+}
+
+.world-map-list .map-list-title {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.world-map-list .map-list-title>h4 {
+    text-align: center;
+    font-size: 18px;
+}
+
+.world-map-list>ul {
+    flex-grow: 1;
+    padding: 5px 15px;
+    line-height: 24px;
+    overflow-y: scroll;
+}
+
+.world-map-list>ul>li {
+    position: relative;
+    padding-left: 15px;
+    font-size: 14px;
+}
+
+s.world-map-list>ul>li::before {
+    content: '';
+    position: absolute;
+    top: 12px;
+    left: 0;
+    width: 0;
+    height: 0;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+    border-left: 5px solid #4e79b7;
+}
+
+.world-map-list>ul>li>a {
+    text-decoration: none;
+    color: #454545;
+}
+
+.route_wrap {
+    border-radius: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.map_wrap {
+    display: flex;
+    flex-direction: column;
+    font-size: 14px;
+    margin-bottom: 30px;
+    margin-top: 10px;
+}
+
+
+/* 경로 헤더 */
+.sub_radio_wrap,
+.sub_radio_wrap>div,
+.btn_wrap {
+    display: flex;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.sub_radio_wrap {
+    border-right: 1px solid #ddd;
+}
+
+input[type="radio"] {
+    width: auto;
+    height: auto;
+    appearance: auto;
+}
+
+.airportweather-world-label {
+    white-space: nowrap;
+}
+
+.btn_wrap>button {
+    padding: 0px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+.route_header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 16px;
+    border-bottom: 1px solid #ddd;
+    background-color: #FAFBFC;
+}
+
+.route_header_left {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.route_header_right {
+    color: #969696;
+    font-size: 12px;
+}
+
+.route_item {
+    display: flex;
+    width: 100%;
+
+}
+
+
+/* 경로 아이템 */
+.route_item {
+    display: flex;
+    background-color: #FAFBFC;
+}
+
+.route_item>div {
+    display: flex;
+    flex-direction: row-reverse;
+    flex: 1;
+    justify-content: space-around;
+    align-items: center;
+    padding: 8px;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+    cursor: pointer;
+}
+
+.route_item>div:last-child {
+    border-right: none;
+}
+
+.route_item>div.active {
+    font-weight: bold;
+    border-bottom: 4px solid #27416B;
+}
+
+.route_item>div>div {
+    padding: 4px 8px;
+    border-radius: 8px;
+    border: 2px solid #27416B;
+}
+
+/* 경로 내용 */
+.route_content {
+    display: none;
+    padding: 0px 8px;
+}
+
+.route_content.active {
+    display: block;
+}
+
+.route_content>div {
+    padding: 8px;
+    display: flex;
+    border-bottom: solid 1px #ddd;
+
+}
+
+.route_content>div:last-child {
+    border-bottom: none;
+}
+
+.route_content>div .title {
+    width: 100px;
+}
+
+.route_content>div .info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+
+/* map button */
+.map_button_wrap {
+    display: flex;
+    gap: 4px;
+    align-items: end;
+}
+
+.map_button_wrap>button {
+    height: fit-content;
+    flex: 1;
+    padding: 8px;
+    color: #969696;
+    background: #EDEDED;
+    border-radius: 8px 8px 0 0;
+}
+
+.map_button_wrap>button.active {
+    height: 40px;
+    padding: 0 16px;
+    background: #FAFBFC;
+    border: 1px solid #ddd;
+    border-bottom: 1px solid #FAFBFC;
+    color: #27416B;
+    font-weight: bold;
+    margin-bottom: -1px;
+    position: relative;
+    z-index: 1;
+    white-space: nowrap;
+}
+
+/* ========== map content ========== */
+/* << 공항연직시계열 >> */
+.map_content {
+    display: none !important;
+    width: 100%;
+    display: flex;
+    border: 1px solid #ddd;
+}
+
+.map_content.active {
+    display: flex !important;
+}
+
+.map_content>div {
+    text-align: center;
+}
+
+.Airport_Meteogram_content>div {
+    flex: 1;
+    border-right: 1px solid #ddd;
+}
+
+.map_content>div:last-child {
+    border-right: none;
+}
+
+.map_title {
+    padding: 8px 16px;
+    background-color: #FAFBFC;
+    border-bottom: 1px solid #ddd;
+}
+
+.map_img {
+    width: 100%;
+    max-height: 680px;
+    height: 100%;
+    object-fit: contain;
+    cursor: pointer;
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    padding: 8px 16px;
+}
+
+.start_map,
+.middle_map,
+.end_map {
+    flex: 1;
+}
+
+/* << SIGNET / AIRMET >> */
+.SIG_AIR_content>div {
+    width: 50%;
+    display: flex;
+    flex-direction: column;
+}
+
+.SIG_AIR_content>div img {
+    width: 85%;
+        height: auto;
+    padding: 8px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+/* table(?) */
+.sig_info,
+.air_info {
+    width: 100%;
+    font-size: 13px;
+    padding: 0 24px;
+    padding-bottom: 8px;
+}
+
+.sig_row,
+.air_row {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+
+.sig_row:last-child,
+.air_row:last-child {
+    border-bottom: none;
+}
+
+.sig_label,
+.air_label {
+    flex: 0 0 90px;
+    padding: 8px 10px;
+    font-weight: 500;
+    line-height: 1.5;
+    word-break: keep-all;
+}
+
+.sig_value,
+.air_value {
+    flex: 1;
+    padding: 8px 10px;
+    line-height: 1.6;
+    word-break: break-all;
+    text-align: start;
+}
+
+.sig_row--content .sig_value,
+.air_row--content .air_value {
+    word-break: break-word;
+}
+
+/* << SIGWX / WINTEM >> */
+.SIGWX_content img,
+.WINTEM_content img {
+    width: 75%;
+    padding: 8px;
+    margin: 0 auto;
+}
+
+/* << 공항기상정보 >> */
+.Airport_Weather_content,
+.TRF_content {
+    flex-direction: column;
+}
+
+.Airport_Weather_content #pdf-pages {
+    display: flex;
+}
+
+.Airport_Weather_content #pdf-pages img {
+    width: 50%;
+    cursor: pointer;
+}
+
+.download-btn {
+    border: 1px solid #ddd;
+    padding: 4px 10px;
+    border-radius: 7px;
+    background: #4e79b7;
+    color: #fff;
+    cursor: pointer;
+    margin-left: 5px;
+    font-size: 12px;
+    box-sizing: border-box;
+}
+
+/* << 이륙예상 >> */
+/* .TRF_content {
+    flex-direction: column;
+} */
+
+.TRF_content .m-b-30 {
+    margin-bottom: 0px;
+}
+
+
+/* << 상세바람기온 >> */
+.WIND_TEMP_content>div {
+    width: 50%;
+}
+
+.WIND_TEMP_content>div:first-child {
+    border-right: 1px solid #ddd;
+}
+
+.WIND_TEMP_content .sub-form {
+    margin-bottom: 0px;
+    flex-direction: initial;
+    align-items: center;
+}
+
+.WIND_TEMP_content .sub-form>span {
+    display: inline-block;
+    height: 25px;
+    font-size: 12px;
+    padding: 5px 20px;
+    border: 1px solid #ddd;
+    background-color: #27416b;
+    color: #fff !important;
+    border-radius: 5px;
+}
+
+.WIND_TEMP_content .sub-form select {
+    height: 20px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    border-radius: .25em;
+}
+
+.WIND_TEMP_content>div>div:last-child {
+    max-height: 680px;
+    overflow-y: auto;
+    padding: 8px 16px;
+}
+
+.WIND_TEMP_content>div>div:last-child img {
+    width: 100%;
+}
+
+
+/* << METAR/TAF >> */
+.METAR_TAF_content {
+    flex-direction: column;
+}
+
+.METAR_TAF_content>div {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+
+.METAR_TAF_content>div:last-child {
+    border-bottom: none;
+}
+
+.port-title {
+    min-width: 130px;
+    display: flex;
+    padding: 8px 16px;
+    background: #f2f7f9;
+    border-right: 1px solid #ddd;
+    flex-direction: column;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.port-title>span {
+    width: fit-content;
+    padding: 4px 8px;
+    border: 1px solid #27416B;
+    color: #27416B;
+    border-radius: 12px;
+}
+
+.port-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 0 8px;
+}
+
+.port-info>div {
+    display: flex;
+    padding: 8px;
+}
+
+.port-info .metar {
+    border-bottom: 1px solid #ddd;
+}
+
+.matar_title,
+.taf_title {
+    width: 100px;
+    padding: 8px;
+}
+
+.metar_info,
+.taf_info {
+    flex: 1;
+    text-align: start;
+    align-content: center;
+    padding: 8px;
+}
+
+
+
+/* ================================================
+    map content_modal
+    =============================================== */
+/* 모달 공통 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-overlay.open {
+    display: flex;
+}
+
+.modal-box {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #fff;
+    border-radius: 12px;
+    /* width: 40%; */
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+#meteogram-modal .modal-box {
+    width: 40%;
+}
+
+#sigmet-airmet-modal .modal-box {
+    width: 70%;
+}
+
+.modal-box .modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #ddd;
+    background: #F7F9FC;
+    margin-bottom: 8px;
+}
+
+.modal-header span {
+    font-size: 15px;
+    font-weight: 500;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #666;
+}
+
+.modal-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    gap: 4px;
+    padding: 0 16px;
+}
+
+.modal-tab {
+    min-width: 80px;
+    padding: 10px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: #666;
+    border: 1px solid #ddd;
+    border-bottom: none;
+    border-radius: 8px 8px 0 0;
+    margin-bottom: -1px;
+}
+
+.modal-tab.active {
+    color: #fafafa;
+    background: #2D6FB7;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.modal-body {
+    flex: 1;
+    overflow-y: auto;
+}
+
+#meteogram-modal .modal-body {
+    padding: 40px;
+}
+
+#sigmet-airmet-modal .modal-body {
+    padding: 24px;
+}
+
+.tab-panel {
+    display: none;
+}
+
+.tab-panel.active {
+    display: block;
+}
+
+
+/* ================================================
+    국내공항 여행 날씨
+    =============================================== */
+/* header */
+.sub-text-input {
+    width: 100%;
+}
+
+.text-box {
+    flex: 1;
+}
+
+.airportweather-world-search {
+    gap: 4px;
+    justify-content: center;
+}
+
+.airportweather-world-label {
+    width: auto !important;
+}
+
+.airportweather-world-search>input {
+    width: 100px;
+}
+
+.map-open-wrap {
+    height: 20px;
+    border: 1px solid #ddd;
+    padding: 2px 15px;
+    border-radius: 4px;
+    background: #4e79b7;
+    color: #fff;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+/* content */
+.now_state_wrap {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.now_state_wrap>div {
+    flex: 1;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    overflow: hidden;
+}
+
+.now_state_wrap>div>div {
+    border-bottom: 1px solid #ddd;
+}
+
+.now_state_wrap>div>div:last-child,
+.state_content>div:last-child {
+    border-bottom: none;
+}
+
+
+.state_text {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #FAFBFC;
+}
+
+.state_text>div {
+    display: flex;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.state_img>div:first-child {
+    width: 100%;
+    height: 150px;
+    background-color: gray;
+}
+
+.state_img>div:last-child {
+    width: 100%;
+    height: 250px;
+    background-color: yellow;
+}
+
+.state_content>div {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+}
+
+.state_content>div>* {
+    padding: 8px;
+}
+
+.state_content>div>p {
+    width: 20%;
+    white-space: nowrap;
+    background: #FAFBFC;
+    border-right: 1px solid #ddd;
+}
+
+.state_content>div>div {
+    width: 80%;
+}
+
+.arrive_wrap {
+    font-size: 14px;
+    margin: 20px 0;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.arrive_header {
+    padding: 8px 16px;
+    border-bottom: 1px solid #ddd !important;
+}
+
+.arrive_header,
+thead {
+    background: #FAFBFC;
+}
+
+/* thead {
+    border: none !important;
+} */
+
+.arrive_container table {
+    border: none !important;
+}
+
+tr:last-child {
+    border-bottom: none !important;
+}
+
+td,
+th {
+    border-bottom: none !important;
+    padding: 4px 8px;
+    text-align: center;
+    font-size: 12px !important;
+}
+
+.arrive_state span {
+    padding: 2px 8px;
+    background: #4E79B7;
+    border-radius: 4px;
+    color: white;
+}
+
+
+/* ================================================
+    건의 게시판
+    =============================================== */
+.sub-text-input {
+    width: auto;
+    gap: 4px;
+}
+
+.notice-wrap,
+.notice-conut,
+.write-radio_wrap {
+    display: flex;
+    font-size: 0.83em;
+}
+
+.notice-wrap {
+    gap: 8px;
+}
+
+.notice-conut {
+    font-size: 15px;
+    color: #969696;
+    ;
+}
+
+.count-form-box {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.write-wrap {
+    display: flex;
+    gap: 16px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+.write-radio_wrap {
+    gap: 8px;
+    align-items: center;
+}
+
+.write-wrap input[type="radio"] {
+    appearance: auto;
+}
+
+/* --- table --- */
+/* notice css */
+
+.write-table {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+.write-table::-webkit-scrollbar {
+    height: 8px;
+}
+
+.write-table::-webkit-scrollbar-thumb {
+    background: #cccccc;
+    border-radius: 10px;
+}
+
+.write-table::-webkit-scrollbar-track {
+    background: #f8fbff;
+}
+
+.write-table>table>tbody {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    max-height: 500px;
+    text-align: center;
+    height: 500px;
+}
+
+.write-table>table>tbody>tr>td>a {
+    text-decoration: none;
+    color: #4e79b7;
+    font-weight: bold;
+}
+
+.write-table table a img {
+    width: 15px;
+}
+
+.write-table>table>thead>tr>th:nth-child(1) {
+    width: 10%;
+    border-right: 0;
+}
+
+.write-table>table>thead>tr>th:nth-child(2) {
+    width: 50%;
+    border-right: 0;
+}
+
+.write-table>table>thead>tr>th:nth-child(3) {
+    width: 10%;
+    border-right: 0;
+}
+
+.write-table>table>thead>tr>th:nth-child(4) {
+    width: 10%;
+    border-right: 0;
+}
+
+.write-table>table>thead>tr>th:nth-child(5) {
+    width: 10%;
+    border-right: 0;
+}
+
+.write-table>table>thead>tr>th:nth-child(6) {
+    width: 10%;
+    border-right: 0;
+}
+
+.write-table>table>tbody>tr>td:nth-child(1) {
+    width: 10%;
+}
+
+.write-table>table>tbody>tr>td:nth-child(2) {
+    width: 50%;
+    text-align: left;
+}
+
+.write-table>table>tbody>tr>td:nth-child(3) {
+    width: 10%;
+}
+
+.write-table>table>tbody>tr>td:nth-child(4) {
+    width: 10%;
+}
+
+.write-table>table>tbody>tr>td:nth-child(5) {
+    width: 10%;
+}
+
+.write-table>table>tbody>tr>td:nth-child(6) {
+    width: 10%;
+}
+
+.write-table>table>thead>tr>th {
+    padding: 0.6em;
+    vertical-align: middle;
+    position: relative;
+    border-right: 0.5px solid #ddd;
+    font-size: 14px;
+}
+
+.write-table>table>tbody>tr>td {
+    padding: 0.6em;
+    vertical-align: middle;
+    position: relative;
+    border-right: 0.5px solid #ddd;
+    font-size: 14px;
+}
+
+.scrolltable>thead {
+    display: block;
+    background: #fafbfc;
+    border-top: 2px solid #000;
+    border-bottom: 1px solid #ddd;
+}
+
+
+
+
+/* ===== check_write ===== */
+.details-file-info {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    color: #969696;
+}
+
+.details-file-info h4 span,
+.details-file-info span {
+    font-size: 12px;
+    color: #969696;
+}
+
+.details-file-info span {
+    cursor: pointer;
+}
+
+.details-file {
+    margin-top: 6px;
+    border: 1px solid #ddd;
+    padding: 8px 16px;
+    align-items: center;
+}
+
+.notice-details-box .details-file a {
+    color: #454545;
+    text-decoration: none;
+}
+
+.notice-details-box .details-file a:hover {
+    color: #4e79b7;
+}
+
+.notice-details-box .details-file a span {
+    color: #969696;
+}
+
+/* comment */
+.comment-container {
+    margin: 0px auto;
+    margin-bottom: 20px;
+    font-family: sans-serif;
+}
+
+.comment-form textarea {
+    width: 100%;
+    height: 30px;
+    resize: none !important;
+    align-content: center;
+    padding: 0 10px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 0.25em;
+    resize: vertical;
+    font-size: 14px;
+}
+
+.comment-form {
+    display: flex;
+}
+
+.comment-form button {
+    height: 30px;
+    white-space: nowrap;
+}
+
+.comment-list {
+    margin: 10px 0;
+}
+
+.comment-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    background: #f2f7f9;
+}
+
+.comment-item:last-child {
+    border-bottom: none;
+}
+
+.comment-content {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.comment-info span {
+    font-size: 14px;
+    color: #969696;
+}
+
+.comment_btn_wrap button {
+    background-color: #78b5ff;
+}
+
+
+
+/* 글쓰기 */
+.write-details-box {
+    border: 1px solid #ddd;
+}
+
+.write-details-box>div {
+    display: flex;
+}
+
+.write-details-box>div>p {
+    width: 80px;
+    background-color: #fafbfc;
+    border-right: 1px solid #ddd;
+    padding: 8px;
+    font-size: 14px;
+    align-content: center;
+    text-align: center;
+}
+
+.write_title {
+    border-bottom: 1px solid #ddd;
+}
+
+.write_title input {
+    flex-grow: 1;
+    /* margin: 4px 8px; */
+    border: none;
+    padding: 0 8px;
+    font-size: 13px;
+}
+
+.write_title input:focus,
+.write_content textarea:focus {
+    border: none;
+    box-shadow: none;
+
+}
+
+.write_content textarea:focus {
+    outline: 1px solid #27416B;
+}
+
+.write_title input::placeholder {
+    color: #757575;
+}
+
+.file_load {
+    border-top: 1px solid #ddd;
+}
+
+.write_content {
+    width: 100%;
+    border-radius: 0.25em;
+    border: none;
+    box-sizing: border-box;
+}
+
+.write_content textarea {
+    flex-grow: 1;
+    height: 400px;
+    resize: none !important;
+    /* margin: 4px 8px; */
+    border: none;
+    padding: 8px;
+    font-size: 13px;
+}
+
+.write_content textarea:focus {
+    color: #111;
+}
+
+
+/* FILE DROP ZONE */
+.file_drop_zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    border-radius: 0.25em;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    padding: 16px;
+    margin: 0 auto;
+    color: #757575;
+}
+
+.file_drop_zone input[type="file"] {
+    display: none;
+}
+
+.file_drop_zone .material-symbols-outlined {
+    font-size: 32px;
+}
+
+.write-details-btn {
+    width: 100%;
+    display: flex;
+    gap: 4px;
+    justify-content: flex-end;
+    margin-bottom: 30px;
+}
+
+.write-adj-btn {
+    justify-content: space-between;
+}
+
+.write-details-btn button {
+    height: fit-content;
+    padding: 8px 16px;
+    font-size: 14px;
+}
+
+.write-details-btn .exit {
+    background: #e2e2e2;
+    color: #969696;
+}

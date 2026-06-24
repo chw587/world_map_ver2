@@ -1,0 +1,351 @@
+/* 시계열 */
+function create_TS(wrapper) {
+	var $wrapper = $(wrapper);
+	var isWafs = $wrapper.find('.ts-wrap').attr('data-wafs') == 'true';
+	var isWwisOnly = $wrapper.find('.ts-wrap').hasClass('ts-wwis');
+
+	var tsBodyInnerWidth = 0;
+	var tsHourlyBodyInnerWidth = 0;
+	var tsWeeklyBodyInnerWidth = 0;
+	var tsBodyWidth = $wrapper.find('.ts-body').width();
+	adjustWwisForecastSize();
+	prepareScrollSize();
+	var tsDayPoints = [0];
+	var tsDayWidth = 0;
+
+	$wrapper.find('.ts-item-wrap').css('width', tsBodyInnerWidth + 'px');
+
+	var $dailyHeads = $wrapper.find('.ts-daily-head')
+	var viewport = document.querySelector(wrapper + ' .ts-body');
+	var content = document.querySelector(wrapper + ' .ts-item-wrap');
+
+	var selectedTabIndex = 0;
+	var currentScrollX = 0;
+	function adjustWwisForecastSize() {
+		if(isWwisOnly) {
+			if(tsBodyWidth > 770) {
+				var dayCount = $wrapper.find('.ts-daily-item').length;
+				if(dayCount > 3) {
+					var itemWidth = tsBodyWidth / dayCount;
+					if(itemWidth < 110) itemWidth = 110;
+					$wrapper.find('.ts-item.ts-weekly-item').css('width', itemWidth + 'px');
+				} else {
+					$wrapper.find('.ts-item.ts-weekly-item').css('width', '220px');
+				}
+			} else {
+				var itemWidth = 110;
+				$wrapper.find('.ts-item.ts-weekly-item').css('width', itemWidth + 'px');
+			}
+		}
+	}
+	function prepareScrollSize() {
+		tsBodyInnerWidth = 0;
+		tsHourlyBodyInnerWidth = 0;
+		tsWeeklyBodyInnerWidth = 0;
+		$wrapper.find('.ts-item').each(function(e) {
+			var itemWidth = $(this).width();
+			if($(this).hasClass('ts-hourly-item')) tsHourlyBodyInnerWidth += itemWidth;
+			if($(this).hasClass('ts-weekly-item')) tsWeeklyBodyInnerWidth += itemWidth;
+			tsBodyInnerWidth += itemWidth;
+		});
+		tsBodyWidth = $wrapper.find('.ts-body').width();
+
+		if(tsBodyWidth < tsBodyInnerWidth) {
+			$wrapper.find('.ts-btn-move').show();
+		} else {
+			$wrapper.find('.ts-btn-move').hide();
+		}
+	}
+	var scr = new ScrollBooster({
+		viewport: viewport,
+		content: content,
+		scrollMode: 'native', // use CSS 'transform' property
+		bounce: true,
+  		direction: 'horizontal', // allow only horizontal scrolling
+  		emulateScroll: false, // scroll on wheel events
+  		onUpdate: function(data) {
+  			currentScrollX = Math.round(data.position.x);
+  			var outOfScroll = currentScrollX > tsBodyInnerWidth - tsBodyWidth;
+  			for(var i = 0 ; i < tsDayPoints.length - 1 ; i++) {
+                var p1 = tsDayPoints[i];
+                var p2 = (i+1 >= tsDayPoints.length - 1) ? 99999999 : (tsDayPoints[i+1]);
+                if(p1 <= currentScrollX && currentScrollX < p2) {
+                    selectedTabIndex = i;
+                    break;
+                }
+            }
+            //console.log(currentScrollX, tsBodyInnerWidth - tsBodyWidth,  tsBodyInnerWidth, tsBodyWidth);
+			if(outOfScroll) return;
+			if(isWwisOnly) return;
+            if(selectedTabIndex < $dailyHeads.length && currentScrollX >= 0) {
+                var selectedSlideLeft = tsDayPoints[selectedTabIndex];
+                var slideWidth = tsDayPoints[selectedTabIndex+1] - selectedSlideLeft;
+                /**/
+                var marginLeft = currentScrollX - selectedSlideLeft;
+                if(marginLeft < slideWidth - 150) {
+                	if($dailyHeads.parent().attr('ata-type') == 'MIDTERM') {
+                    	$dailyHeads.eq(selectedTabIndex).find('>h3').css({ 'margin-left': 'auto'});
+                    } else {
+                    	$dailyHeads.eq(selectedTabIndex).find('>h3').css({ 'margin-left': (marginLeft + 40)+ 'px'});
+                    	$(".MIDTERM-HEAD").css("margin-left","0px");
+                    }
+                }
+            } else if(currentScrollX < 0) {
+            	$dailyHeads.eq(0).find('>h3').css({ 'margin-left': '40px'});
+            }
+            if(!isWafs) {
+	            if(tsDayPoints[selectedTabIndex] >= tsHourlyBodyInnerWidth || currentScrollX >= tsBodyInnerWidth - tsBodyWidth - 10) {
+	            	$wrapper.find('.ts-legend.ts-type-weekly').show();
+	            	$wrapper.find('.ts-legend.ts-type-daily').hide();
+	            } else {
+	            	$wrapper.find('.ts-legend.ts-type-weekly').hide();
+	            	$wrapper.find('.ts-legend.ts-type-daily').show();
+	            }
+			}
+			/*
+			var targetScrollX =  currentScrollX - tsBodyWidth;
+			var targetScrollX2 =  currentScrollX + tsBodyWidth;
+			if(targetScrollX < 0) {
+				targetScrollX = 0;
+			}
+			
+			if(targetScrollX==0){
+				$('.ts-btn-move-left').hide();
+			}else{
+				$('.ts-btn-move-left').show();
+			}
+			
+			if((targetScrollX2+tsBodyWidth)>=tsBodyInnerWidth){
+				$('.ts-btn-move-right').hide();
+			}else{
+				$('.ts-btn-move-right').show();
+			}
+			*/
+  		}
+	});
+
+
+	$wrapper.find('.ts-daily-item').each(function(e) {
+		var w = $(this).width();
+		tsDayWidth += w;
+		tsDayPoints.push(tsDayWidth);
+	});
+
+	$wrapper.on('click', '.ts-btn-move-left', function(e) {
+		e.preventDefault();
+		var targetScrollX =  currentScrollX - tsBodyWidth;
+		if(targetScrollX < 0) {
+			targetScrollX = 0;
+		}
+		/*
+		if(targetScrollX==0){
+			$('.ts-btn-move-left').hide();
+		}
+		if((targetScrollX+tsBodyWidth)<tsBodyInnerWidth){
+			$('.ts-btn-move-right').show();
+		}*/
+		
+		scr.scrollTo({ x: targetScrollX });
+		
+	});
+	$wrapper.on('click', '.ts-btn-move-right', function(e) {
+		e.preventDefault();
+		var targetScrollX =  currentScrollX + tsBodyWidth;
+		if(tsBodyInnerWidth - tsBodyWidth <= targetScrollX) {
+			targetScrollX = tsBodyInnerWidth - tsBodyWidth;
+		}
+		/*
+		if(targetScrollX!=0){
+			$('.ts-btn-move-left').show();
+		}
+		
+		if((targetScrollX+tsBodyWidth)>=tsBodyInnerWidth){
+			$('.ts-btn-move-right').hide();
+		}*/
+		
+		scr.scrollTo({ x: targetScrollX });
+		
+	});
+	// 2025-11-13 고경환 항공날씨 메인페이지 예보 종류에 따라 시계열 내 각 위치로 이동하는 이벤트 추가
+	$('.navBtn').on('mouseover', function(e) {
+		
+		let fcst = $(this).data('fcst');
+		
+		let fcstTargetX = 0;
+
+		if (fcst == "short"){
+			$('.ts-daily-item[data-type="DAILY"]').find('.ts-item').not(':has(.dfsStart)').each(function (){fcstTargetX += $(this).width()});
+		} else if (fcst == "mid"){
+			$('.ts-daily-item[data-type="DAILY"]').each(function (){fcstTargetX += $(this).width()});
+		}
+		
+		scr.scrollTo({ x: fcstTargetX });
+	})
+	
+	$(window).on('resize', function(e) {
+		console.log('resize');
+		prepareScrollSize();
+	});
+
+	function createAirTempChart() {
+		if(isWafs) return;
+		var $chartWrapper = $wrapper.find('.ts-chart-atemp');
+		$chartWrapper.css('width', tsHourlyBodyInnerWidth + 'px');
+		var tempList = [];
+		$wrapper.find('li[data-atemp]').each(function() {
+			tempList.push(parseFloat($(this).attr('data-atemp')));
+		});
+		var id = 'ts-atemp-chart';
+		var $tchart = $('<div>').attr('id', id).css({ width: '100%', height: '100%'}).appendTo($chartWrapper);
+
+        var minPadding = 1.0 / (tempList.length * 2.0);
+        var maxPadding = minPadding;
+        var minValue = 999;
+        var maxValue = -999;
+        for(var i = 0 ; i < tempList.length ; i++) {
+            var tempValue = tempList[i];
+            if(tempValue > maxValue) maxValue = tempValue;
+            if(tempValue < minValue) minValue = tempValue;
+        }
+        var lineColor = "#1185FE", fontColor = "#1185FE";
+        var chart = Highcharts.chart(id, {
+            plotOptions: {
+                series: {
+                    pointStart: 1
+                },
+                spline: {
+                    color: lineColor,
+                    dataLabels: {
+                        enabled: false,
+                        style: { fontSize: '14px', fontWeight: 'normal', color: fontColor, textOutline: false },
+                        formatter: function () { return this.y + '℃'; }
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: [{ name: '', data: tempList, showInLegend: false, animation:false }],
+            yAxis: {
+                min: minValue, max: maxValue,
+                tickInterval: 0.1,
+                gridLineColor: "rgba(0,0,0,0)",
+                labels:{ enabled: false },
+                title: { enabled: false },
+            },
+            xAxis: {
+                lineColor: "rgba(0,0,0,0)",
+                tickColor: "rgba(0,0,0,0)",
+                labels: { enabled: false },
+                title: { enabled: false },
+                minPadding: minPadding,
+                maxPadding: maxPadding,
+                margin: 0, padding: 0,
+            },
+            chart: { type:'spline', backgroundColor: "rgba(0,0,0,0)", margin: 0, padding: 0, style: { fontFamily: "'ns', sans-serif" } },
+            title: { text: null },
+            credits: { enabled:false },
+        });
+	}
+
+	function createMinMaxTempChart() {
+		var $chartWrapper = $wrapper.find('.ts-chart-minmaxtemp');
+		$chartWrapper.css({
+			'left': tsHourlyBodyInnerWidth + 'px',
+			'width': tsWeeklyBodyInnerWidth + 'px',
+		});
+		var allTempList = [];
+		var maxTempList = [];
+		var minTempList = [];
+		$wrapper.find('.ts-weekly-item[data-item-type="AM"] li[data-max-temp]').each(function() {
+			allTempList.push(parseFloat($(this).attr('data-max-temp')));
+			maxTempList.push(parseFloat($(this).attr('data-max-temp')));
+		});
+		$wrapper.find('.ts-weekly-item[data-item-type="ALLDAY"] li[data-max-temp]').each(function() {
+			allTempList.push(parseFloat($(this).attr('data-max-temp')));
+			maxTempList.push(parseFloat($(this).attr('data-max-temp')));
+		});
+
+		$wrapper.find('.ts-weekly-item[data-item-type="AM"] li[data-min-temp]').each(function() {
+			allTempList.push(parseFloat($(this).attr('data-min-temp')));
+			minTempList.push(parseFloat($(this).attr('data-min-temp')));
+		});
+		$wrapper.find('.ts-weekly-item[data-item-type="ALLDAY"] li[data-min-temp]').each(function() {
+			allTempList.push(parseFloat($(this).attr('data-min-temp')));
+			minTempList.push(parseFloat($(this).attr('data-min-temp')));
+		});
+
+		var id = 'ts-maxtemp-chart' + (isWwisOnly ? '-wwis' : '');
+		var $tchart = $('<div>').attr('id', id).css({ width: '100%', height: '100%'}).appendTo($chartWrapper);
+
+        var minPadding = 1.0 / (maxTempList.length * 2.0);
+        var maxPadding = minPadding;
+        var minValue = 999;
+        var maxValue = -999;
+        for(var i = 0 ; i < allTempList.length ; i++) {
+            var tempValue = allTempList[i];
+            if(tempValue > maxValue) maxValue = tempValue;
+            if(tempValue < minValue) minValue = tempValue;
+        }
+        var delta = maxValue - minValue;
+        if(delta != 0) {
+            maxValue = maxValue + (delta * 0.7);
+            minValue = minValue - (delta * 0.7);
+        } else {
+            maxValue = maxValue + (maxValue * 0.7);
+            minValue = minValue - (minValue * 0.7);
+        }
+        /*console.log(minTempList, maxTempList, minValue, maxValue);
+        var chart = Highcharts.chart(id, {
+            plotOptions: {
+                series: {
+                    pointStart: 1
+                },
+                spline: {
+                    color: "#1185FE",
+                    dataLabels: {
+                        enabled: true,
+                        style: { fontSize: '14px', fontWeight: 'normal', color: "#1185FE", textOutline: false },
+                        formatter: function () { return this.y + '℃'; }
+                    },
+                    enableMouseTracking: false
+                }
+            },
+            series: [
+            	{ name: 'Min Temperature', data: minTempList, showInLegend: false, animation:false, color:'#1185FE', dataLabels: { overflow: 'allow', y: 25, style: { color: '#1185FE'} } },
+            	{ name: 'Max Temperature', data: maxTempList, showInLegend: false, animation:false, color:'#ff2500', dataLabels: { style: { color: '#ff2500'} } }
+            ],
+            yAxis: {
+                min: minValue, max: maxValue,
+                tickInterval: 0.1,
+                gridLineColor: "rgba(0,0,0,0)",
+                labels:{ enabled: false },
+                title: { enabled: false },
+            },
+            xAxis: {
+                lineColor: "rgba(0,0,0,0)",
+                tickColor: "rgba(0,0,0,0)",
+                labels: { enabled: false },
+                title: { enabled: false },
+                minPadding: minPadding,
+                maxPadding: maxPadding,
+                margin: 0, padding: 0,
+            },
+            chart: { type:'spline', backgroundColor: "rgba(0,0,0,0)", margin: 0, padding: 0, style: { fontFamily: "'ns', sans-serif" } },
+            title: { text: null },
+            credits: { enabled:false },
+        });*/
+	}
+	function showWeeklyInfo() {
+		if(isWwisOnly) return;
+		var $infoWrapper = $wrapper.find('.ts-info-weekly');
+		$infoWrapper.css({
+			'left': tsHourlyBodyInnerWidth + 'px',
+			'width': tsWeeklyBodyInnerWidth + 'px',
+			'display': 'flex',
+		});
+	}
+	/*createAirTempChart();*/
+	createMinMaxTempChart();
+	showWeeklyInfo();
+	
+	//scr.scrollTo({ x: 0 });
+}

@@ -1,0 +1,245 @@
+.amos-table{
+	text-align: center;
+}
+#iframeArea {
+  position: relative; /* absolute는 부모가 relative일 때 부모를 따라간다. */
+  width: 100%;
+  padding-bottom: 125%;
+  display: none;
+}
+#iframeTdwr{
+  position: relative; /* absolute는 부모가 relative일 때 부모를 따라간다. */
+  width: 100%;
+  padding-bottom: 115%;
+}
+
+#iframeLow{
+  position: relative; /* absolute는 부모가 relative일 때 부모를 따라간다. */
+  width: 100%;
+  padding-bottom: 110%;
+}
+
+#iframeWide {
+  position: relative; /* absolute는 부모가 relative일 때 부모를 따라간다. */
+  width: 100%;
+  padding-bottom: 80%;
+  display: none;
+}
+
+#iframeMoon{
+  position: relative; /* absolute는 부모가 relative일 때 부모를 따라간다. */
+  width: 100%;
+}
+
+#iframeSquare{
+  position: relative; /* absolute는 부모가 relative일 때 부모를 따라간다. */
+  width: 100%;
+  padding-bottom: 100%;
+}
+
+@media screen and (min-width: 1099px) {
+    #iframeArea {
+        padding-bottom: 80%;
+        display: none;
+    }
+    #iframeWide {
+        padding-bottom: 650px;
+    }
+    #iframeSquare{
+    	padding-bottom: 950px;
+    }
+    #iframeTdwr{
+    	padding-bottom: 770px;
+    }
+    #iframeLow{
+    	padding-bottom: 76%;
+    }
+}
+
+#iframeArea #ifrm,#iframeWide #ifrm,#iframeSquare #ifrm,#iframeTdwr #ifrm,#iframeLow #ifrm {
+  position: absolute;
+  width: 100%; /* 부모에 맞게 꽉 채운다. */
+  height: 100%;
+}
+
+@media screen and (max-width: 450px) {
+	/*
+	.sub-form{
+		padding: 20px 15px;
+	}
+	.tropopause-form-box .sub-radiobtn-title{
+		width: 70px;
+	}*/
+	.sub-form h4{
+		padding-right: 0px;
+	}
+	.move-wrap{
+		padding: 0px !important;
+	}
+}
+
+.map-legend{
+	max-width: 840px;
+	margin: 0px auto;
+}
+.legend-title{
+	max-width: 820px;
+    margin: 0px auto;
+    margin-bottom: 10px;
+}
+/*.sigmet-legend,.airmet-legend{
+	max-width: 381px;
+}*/
+div.media{
+	margin: 0px auto;
+}
+
+#wafsImg{
+	display : none;
+}
+#wafsNotFind{
+	display : none;
+}
+.seT_terms{
+	display : none;
+}
+/*.airmet-table,.sigmet-table {
+    max-width: 550px;
+}*/
+.mypage-alert-form > .sound-btn > img {
+    height: 15px;
+}
+.sound-btn{
+	font-size: 12px;
+}
+.takeoff-forecast-table > table > tbody {
+    display: block;
+    width: 100%;
+    overflow: auto;
+    max-height: 300px;
+    text-align: center;
+    height: 300px;
+}
+.registration-content .registration-from > .registration-from-half > h5 > span{
+	padding: 3px 20px;
+}
+
+.m_Table::-webkit-scrollbar{height:3px;}
+.m_Table::-webkit-scrollbar-thumb{background: #cccccc; border-radius: 10px;}
+.m_Table::-webkit-scrollbar-track{background: #f8fbff;}
+
+.sigmet-table2 > thead > tr > th:nth-child(1) {
+	width: 5%;
+}
+
+.sigmet-table2 > thead > tr > th:nth-child(2) {
+	width: 10%;
+}
+
+.sigmet-table2 > thead > tr > th:nth-child(3) {
+	width: 13%;
+}
+
+.sigmet-table2 > thead > tr > th:nth-child(4) {
+	width: 13%;
+}
+
+.sigmet-table2 > thead > tr > th:nth-child(5) {
+	width: 50%;
+}
+
+.sigmet-table2 > thead > tr > th:nth-child(6) {
+	width: 9%;
+}
+
+
+.sigmet-table2 > tbody > tr > td:nth-child(1) {
+	width: 5%;
+}
+
+.sigmet-table2 > tbody > tr > td:nth-child(2) {
+	width: 10%;
+}
+
+.sigmet-table2 > tbody > tr > td:nth-child(3) {
+	width: 13%;
+}
+
+.sigmet-table2 > tbody > tr > td:nth-child(4) {
+	width: 13%;
+}
+
+.sigmet-table2 > tbody > tr > td:nth-child(5) {
+	width: 50%;
+}
+
+.sigmet-table2 > tbody > tr > td:nth-child(6) {
+	width: 9%;
+}
+
+.sigmet-table2 > tbody{
+	max-height: 635px;
+	width: 100%;
+}
+
+
+
+
+
+.airmet-table2 > thead > tr > th:nth-child(1) {
+	width: 5%;
+}
+
+.airmet-table2 > thead > tr > th:nth-child(2) {
+	width: 10%;
+}
+
+.airmet-table2 > thead > tr > th:nth-child(3) {
+	width: 13%;
+}
+
+.airmet-table2 > thead > tr > th:nth-child(4) {
+	width: 13%;
+}
+
+.airmet-table2 > thead > tr > th:nth-child(5) {
+	width: 50%;
+}
+
+.airmet-table2 > thead > tr > th:nth-child(6) {
+	width: 9%;
+}
+
+
+.airmet-table2 > tbody > tr > td:nth-child(1) {
+	width: 5%;
+}
+
+.airmet-table2 > tbody > tr > td:nth-child(2) {
+	width: 10%;
+}
+
+.airmet-table2 > tbody > tr > td:nth-child(3) {
+	width: 13%;
+}
+
+.airmet-table2 > tbody > tr > td:nth-child(4) {
+	width: 13%;
+}
+
+.airmet-table2 > tbody > tr > td:nth-child(5) {
+	width: 50%;
+}
+
+.airmet-table2 > tbody > tr > td:nth-child(6) {
+	width: 9%;
+}
+
+.airmet-table2 > tbody{
+	max-height: 635px;
+	width: 100%;
+}
+
+.tab-link-no{
+	cursor: pointer;
+}

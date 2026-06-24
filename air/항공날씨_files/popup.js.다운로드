@@ -1,0 +1,121 @@
+const parentsEl = '.layer_bg' //팝업 컨텐츠 박스 추가할 부모요소
+const firstPopSeq=popupList[0].seq //마지막에 표출될 팝업의 시퀀스(등록기준 첫번째)
+
+$(function () {
+    if(getCookie('popupShow')!='hide' && firstPopSeq!==''){
+        $(".layer_bg").show();
+        for(var i in popupList){
+            addPopupLayer(popupList[i].seq, popupList[i].mode, popupList[i].title, popupList[i].filename)
+        }
+    }
+
+    $('input[name="fir"]').on('click',function(){
+        $(".layer_wrap, .layer_bg").fadeOut();
+        setCookie('popupShow','hide',1);
+    })
+
+    //닫기 버튼 클릭시 레이어 닫기
+    $(".btn_close").click(function () {
+        layer_close(this);
+    });
+});
+
+//레이어팝업 close 상태 function 만들기
+function layer_close(me) {
+    var layerEl=me.closest('.layer_wrap')
+    var layer=$(layerEl).attr('layer')
+
+    if(layer>firstPopSeq){
+        $(".layer_wrap[layer="+layer+"]").fadeOut();
+    }else{
+        $(".layer_wrap[layer="+layer+"], .layer_bg").fadeOut();
+    }
+};
+
+/*
+ * 함수명 : 팝업 레이어 추가
+ * 인  자: 팝업 시퀀스, 팝업구분(일반/태풍), 팝업 제목, 팝업 파일명
+ * 설  명: 팝업 모드에 따라 다른 양식의 팝업 컨텐츠를 화면(parentsEl)에 추가
+ */
+function addPopupLayer(layerNum, webMode, webTitle, webFile) {
+    //팝업 제목
+    var popTitle = webTitle;
+    // 팝업 파일명
+    var popFile = webFile;
+    //PopupController.java 내 기재된 path
+    var poppath = 'https://global.amo.go.kr/WEBDATA/KAMA_HP/global/popup/';  
+    //var poppath = 'http://localhost:18080/WEBDATA/KAMA_HP/global/popup/';
+
+    var defaultContent = `
+                    <div class="layer_wrap default-layer-wrap" layer="`+layerNum+`">
+                        <div class="btn_close_box">
+                            <div class="check-close">
+                                <input type="checkbox" name="fir" value="fir" id="fir">
+                                <label for="fir" class="m-r-20">오늘 하루 안 보기(전체)</label>
+                            </div>
+                            <div class="close-icon">
+                                <a href="javascript:;" class="btn_close">닫기</a>
+                            </div>
+                        </div>
+                        <h3>` + popTitle + `</h3>
+                        <div class="popup-image">
+                            <img src='` + poppath + popFile + `'>
+                        </div>
+                    </div>
+            `;
+    var typhoonContent = `
+                    <div class="layer_wrap" layer="`+layerNum+`">
+                        <div class="btn_close_box">
+                            <div class="check-close">
+                                <input type="checkbox" name="fir" value="fir" id="fir">
+                                <label for="fir" class="m-r-20">오늘 하루 안 보기(전체)</label>
+                            </div>
+                            <div class="close-icon">
+                                <a href="javascript:;" class="btn_close">닫기</a>
+                            </div>
+                        </div>
+                        <div class="typhoonInfoWrap">
+                            <h3>` + popTitle + `</h3>
+                            <p>` + formatTyphoonDate(popFile) + `</p>
+                        </div>
+                        <div class="popup-image">
+                            <img src='` + 'https://www.weather.go.kr/w/repositary/image/typ/img/' + popFile + `'>
+                        </div>
+                        <div class="popup-shortcuts-btn">
+                            <a href="https://amo.kma.go.kr/weather/typhoon.do" target="_blank">태풍정보 바로가기</a>
+                        </div>
+                    </div>
+            `;
+
+    if (webMode === '0') {
+        $(parentsEl).append(defaultContent);
+    } else if (webMode === '1') {
+        $(parentsEl).append(typhoonContent);
+    }
+}
+
+/*
+ * 함수명 : 태풍자료 발표 시각 반환
+ * 인  자: fileName(예시 RTKO63_202408081219]07_ko.png")
+ * 설  명: fileName에서 정규 표현식으로 필요 날짜정보를 파싱하여, 'yyyy년 mm월 dd일 hh24시 mi분 발표' 형식으로 변환하여 반환.
+ *        변환 실패 시, '태풍 경로 발표'로 반환.
+ */
+function formatTyphoonDate(fileName) {
+    // 정규식을 사용하여 '발표일시' 추출 (숫자 10자리 + 대괄호)
+    const dateMatch = fileName.match(/RTKO63_(\d{8}\d{4})/);
+
+    if (dateMatch && dateMatch[1]) {
+        const rawDate = dateMatch[1];
+
+        const year = rawDate.substring(0, 4);
+        const month = rawDate.substring(4, 6);
+        const day = rawDate.substring(6, 8);
+        const hour = rawDate.substring(8, 10);
+        const minute = rawDate.substring(10, 12);
+
+        const formattedDate = `${year}년 ${month}월 ${day}일 ${hour}시 ${minute}분 발표`;
+        return formattedDate;
+    } else {
+        return "태풍 경로 발표";
+    }
+}
