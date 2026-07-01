@@ -88,3 +88,24 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
         if (e.target === this) closeModal(this.id);
     });
 });
+
+
+// 공항기상정보 라디오 페이지 전환
+document.querySelectorAll('input[name="flightPort"]').forEach(function(radio) {
+    radio.addEventListener('change', function() {
+        // 모든 pdf-pages 숨기기
+        document.querySelectorAll('.pdf-pages').forEach(function(page) {
+            page.style.display = 'none';
+        });
+
+        // 선택된 값에 따라 해당 페이지 보이기
+        const value = this.value;
+        if (value === 'start') {
+            document.getElementById('start-pages').style.display = 'block';
+        } else if (value === 'middle') {
+            document.getElementById('middle-pages').style.display = 'block';
+        } else if (value === 'arrive') {
+            document.getElementById('arrive-pages').style.display = 'block';
+        }
+    });
+});

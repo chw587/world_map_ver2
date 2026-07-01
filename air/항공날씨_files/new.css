@@ -67,7 +67,7 @@
     background-image: url("../img/map.webp");
     background-size: cover;
     background-repeat: no-repeat;
-    background-position:  center center;
+    background-position: center center;
 }
 
 .world_map_wrap .gis-map-container .point {
@@ -387,6 +387,8 @@ input[type="radio"] {
 }
 
 
+
+
 /* map button */
 .map_button_wrap {
     display: flex;
@@ -476,7 +478,7 @@ input[type="radio"] {
 
 .SIG_AIR_content>div img {
     width: 85%;
-        height: auto;
+    height: auto;
     padding: 8px;
     box-sizing: border-box;
     margin: 0 auto;
@@ -539,13 +541,26 @@ input[type="radio"] {
     flex-direction: column;
 }
 
-.Airport_Weather_content #pdf-pages {
+.Airport_Weather_content .pdf-pages {
     display: flex;
 }
 
-.Airport_Weather_content #pdf-pages img {
+.Airport_Weather_content .pdf-pages img {
     width: 50%;
     cursor: pointer;
+}
+
+.Airport_Weather_content .sub-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.Airport_Weather_content .check-box .sub_radio {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+
 }
 
 .download-btn {
@@ -572,11 +587,7 @@ input[type="radio"] {
 
 /* << 상세바람기온 >> */
 .WIND_TEMP_content>div {
-    width: 50%;
-}
-
-.WIND_TEMP_content>div:first-child {
-    border-right: 1px solid #ddd;
+    width: 100%;
 }
 
 .WIND_TEMP_content .sub-form {
@@ -606,11 +617,11 @@ input[type="radio"] {
 .WIND_TEMP_content>div>div:last-child {
     max-height: 680px;
     overflow-y: auto;
-    padding: 8px 16px;
+    padding: 24px;
 }
 
 .WIND_TEMP_content>div>div:last-child img {
-    width: 100%;
+    width: 70%;
 }
 
 
@@ -788,7 +799,7 @@ input[type="radio"] {
 }
 
 .tab-panel.active {
-    display: block;
+    display: flex;
 }
 
 
@@ -1332,4 +1343,61 @@ th {
 .write-details-btn .exit {
     background: #e2e2e2;
     color: #969696;
+}
+
+/* ===== 반응형 ----- */
+@media (max-width: 1024px) {
+
+    /* header */
+    .airep-form-box,
+    .sub-text-input {
+        flex-direction: initial !important;
+        align-items: center;
+    }
+
+    .sub-text-input>.text-box {
+        margin-bottom: 0px;
+    }
+
+    .map_button_wrap>button {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* content */
+    .SIGWX_content img,
+    .WINTEM_content img,
+    .WIND_TEMP_content>div>div:last-child img {
+        width: 100%;
+    }
+
+    .WIND_TEMP_content>div>div:last-child {
+        max-height: 100%;
+    }
+
+    /* modal */
+    .modal-box {
+        width: 90% !important;
+    }
+}
+
+
+@media (max-width: 768px) {
+
+    /* footer */
+    .footer .footer-menu .footer-menulist {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .footer .footer-copyright .copyright-content {
+        padding: 40px 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-direction: column;
+    }
 }
