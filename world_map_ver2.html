@@ -1652,7 +1652,10 @@
 
                             <div class="map_container">
                                 <!-- 모달창에서 이동하는 탭이 잘 보이지 않는다고 함 ( 탭버튼 배경설정 예정 ) -->
-                                <div class="Airport_Meteogram_content map_content active">
+                                <div class="Airport_Meteogram_content map_content active" style="position: relative;">
+                                    <div style="position: absolute;bottom: -25px;border: none;">
+                                        <h4>해당이미지를 클릭하면 더 큰 이미지로 확인할 수 있습니다ㅣ.</h4>
+                                    </div>
                                     <div class="start_map" onclick="openModal('meteogram-modal', 0)">
                                         <img class="map_img" src="./air/항공날씨_files/new/RCTP.png" alt="airport-icon">
                                     </div>
@@ -1666,7 +1669,10 @@
                                 </div>
 
                                 <!-- 모달창에서 정보가 한눈에 보였으면좋겠음 -> 고민해볼 예정 -->
-                                <div class="SIG_AIR_content map_content">
+                                <div class="SIG_AIR_content map_content" style="position: relative;">
+                                    <div style="width: 100%;;position: absolute;bottom: -25px;border: none;">
+                                        <h4>해당이미지를 클릭하면 더 큰 이미지로 확인할 수 있습니다ㅣ.</h4>
+                                    </div>
                                     <div class="SIG" style="border-right: 1px solid #ddd;"
                                         onclick="openModal('sigmet-airmet-modal', 0)">
                                         <img class="map_img" src="./air/항공날씨_files/new/SITMET.png" alt="sigmet-icon">
