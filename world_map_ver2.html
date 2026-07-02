@@ -1489,13 +1489,13 @@
                             <div class="sub-form airep-form-box" id="openTerms">
                                 <div class="sub-text-input">
                                     <div class="sub_radio_wrap">
-                                        <div class="sub_radio">
+                                        <div class="sub_radio" onclick="selectFlightTypeOption(this)">
                                             <input type='radio' name="flightType" value="direct" checked
                                                 onchange="toggleStopover(this)">
                                             <span class="airportweather-world-label">직항</span>
                                         </div>
 
-                                        <div class="sub_radio">
+                                        <div class="sub_radio" onclick="selectFlightTypeOption(this)">
                                             <input type='radio' name="flightType" value="stopover"
                                                 onchange="toggleStopover(this)">
                                             <span class="airportweather-world-label">경유</span>
@@ -1940,40 +1940,40 @@
                                         <div class="content-img sixwx-img m-b-30" id="tab-1">
 
                                             <div class="control-movi-wrap image-control-form-player">
-                                                    <div class="play-buttons-wrap">
-                                                        <div class="left-btn playbtn" data-role="prev-slide"></div>
-                                                        <div class="play-buttons playbtn" data-role="play-slide">
-                                                            <div id="first" class="play playbtn"></div>
-                                                            <div id="second" class="play playbtn"></div>
-                                                        </div>
-                                                        <div class="right-btn playbtn" data-role="next-slide"></div>
+                                                <div class="play-buttons-wrap">
+                                                    <div class="left-btn playbtn" data-role="prev-slide"></div>
+                                                    <div class="play-buttons playbtn" data-role="play-slide">
+                                                        <div id="first" class="play playbtn"></div>
+                                                        <div id="second" class="play playbtn"></div>
                                                     </div>
-
-                                                    <div class="control-movi-lap">
-                                                        <div
-                                                            class="movi-line ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content">
-                                                            <span tabindex="0"
-                                                                class="ui-slider-handle ui-corner-all ui-state-default"
-                                                                style="left: 0%;">02일09시(KST)</span>
-                                                        </div>
-                                                        <div class="movi-bar-wrap" style="width: 0%;"></div>
-                                                    </div>
+                                                    <div class="right-btn playbtn" data-role="next-slide"></div>
                                                 </div>
 
-                                             <img src="./air/항공날씨_files/new/wintem.gif" alt="wintem-icon">
+                                                <div class="control-movi-lap">
+                                                    <div
+                                                        class="movi-line ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content">
+                                                        <span tabindex="0"
+                                                            class="ui-slider-handle ui-corner-all ui-state-default"
+                                                            style="left: 0%;">02일09시(KST)</span>
+                                                    </div>
+                                                    <div class="movi-bar-wrap" style="width: 0%;"></div>
+                                                </div>
+                                            </div>
+
+                                            <img src="./air/항공날씨_files/new/wintem.gif" alt="wintem-icon">
                                             <div>
                                                 <!-- <iframe name="ifrm" id="ifrm"
                                                     style="width: 100%; border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; overflow: hidden; height: 700px;"
                                                     scrolling="no"></iframe> -->
 
-                                                   
+
                                             </div>
                                         </div>
                                     </form>
 
 
 
-                                    
+
                                 </div>
 
                                 <!-- 한화면에 출발, 경우, 도착공항에 대한 모든 정보가 나왔으면 좋겠으 -> 탭으로 정보이동할 수 있도록 할 예정 -->
@@ -2279,23 +2279,44 @@
                                                     value="kim_gdps_lc40_wtem_">
                                                 <input id="gubun" type="hidden" name="gubun" value="detail-wind-temp">
                                                 <input type="hidden" name="hpa" id="hpaHidden" value="20">
-
-                                                <!-- tab -->
                                                 <div class="tab-content-box active" id="tab-1">
-                                                    <div class="sub-radiobtn">
+                                                    <div class="sub-radiobtn m-b-5">
                                                         <h4 class="sub-radiobtn-title">고도별</h4>
-                                                        <select name="hpa_gdaps" id="hpa_gdaps">
-                                                            <option value="20">39,000ft</option>
-                                                            <option value="30">30,000ft</option>
-                                                            <option value="50">18,000ft</option>
-                                                            <option value="70">10,000ft</option>
-                                                            <option value="85">5,000ft</option>
-                                                            <option value="92">2,500ft</option>
-                                                        </select>
+                                                        <div class="sigwx-radiobtn-box">
+                                                            <div class="sigwx-radiobtn">
+                                                                <input type="radio" name="hpa_gdaps" value="20"
+                                                                    id="wt20" checked="">
+                                                                <label for="wt20" class="m-r-20 m-l-10">39,000ft</label>
+                                                            </div>
+                                                            <div class="sigwx-radiobtn">
+                                                                <input type="radio" name="hpa_gdaps" value="30"
+                                                                    id="wt30">
+                                                                <label for="wt30" class="m-r-20 m-l-10">30,000ft</label>
+                                                            </div>
+                                                            <div class="sigwx-radiobtn">
+                                                                <input type="radio" name="hpa_gdaps" value="50"
+                                                                    id="wt50">
+                                                                <label for="wt50" class="m-r-20 m-l-10">18,000ft</label>
+                                                            </div>
+                                                            <div class="sigwx-radiobtn">
+                                                                <input type="radio" name="hpa_gdaps" value="70"
+                                                                    id="wt70">
+                                                                <label for="wt70" class="m-r-20 m-l-10">10,000ft</label>
+                                                            </div>
+                                                            <div class="sigwx-radiobtn">
+                                                                <input type="radio" name="hpa_gdaps" value="85"
+                                                                    id="wt85">
+                                                                <label for="wt85" class="m-r-20 m-l-10">5,000ft</label>
+                                                            </div>
+                                                            <div class="sigwx-radiobtn">
+                                                                <input type="radio" name="hpa_gdaps" value="92"
+                                                                    id="wt92">
+                                                                <label for="wt92" class="m-r-20 m-l-10">2,500ft</label>
+                                                            </div>
+                                                        </div>
                                                     </div>
-
-
                                                 </div>
+
                                             </form>
                                         </div>
 

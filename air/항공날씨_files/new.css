@@ -1,3 +1,6 @@
+/* ================================================
+   레이아웃 기본
+   ================================================ */
 .page-wrap {
     height: 100vh;
     display: flex;
@@ -22,10 +25,15 @@
     display: none;
 }
 
-/* ==================================================== */
+
+/* ================================================
+   세계지도 / GIS 지도
+   ================================================ */
 .airportweather-world-label {
     padding: 0px !important;
     align-content: center;
+    white-space: nowrap;
+    width: auto !important;
 }
 
 .world_map_wrap {
@@ -262,7 +270,7 @@
 .world-map-list>ul>li:hover {
     background-color: #f2f7f9;
     cursor: pointer;
-} 
+}
 
 .world-map-list>ul>li::before {
     content: '';
@@ -281,6 +289,10 @@
     color: #454545;
 }
 
+
+/* ================================================
+   경로(출발/도착) 영역
+   ================================================ */
 .route_wrap {
     border-radius: 8px;
     font-size: 14px;
@@ -535,7 +547,6 @@
     }
 }
 
-
 /* 경로 헤더 */
 .sub_radio_wrap,
 .sub_radio_wrap>div,
@@ -550,14 +561,10 @@
 }
 
 input[type="radio"] {
-/* display: none !important; */
+    /* display: none !important; */
     width: auto;
     height: auto;
     appearance: auto;
-}
-
-.airportweather-world-label {
-    white-space: nowrap;
 }
 
 .btn_wrap>button {
@@ -589,13 +596,6 @@ input[type="radio"] {
 .route_item {
     display: flex;
     width: 100%;
-
-}
-
-
-/* 경로 아이템 */
-.route_item {
-    display: flex;
     background-color: #FAFBFC;
 }
 
@@ -640,7 +640,6 @@ input[type="radio"] {
     padding: 8px;
     display: flex;
     border-bottom: solid 1px #ddd;
-
 }
 
 .route_content>div:last-child {
@@ -658,9 +657,9 @@ input[type="radio"] {
 }
 
 
-
-
-/* map button */
+/* ================================================
+   map button / map content
+   ================================================ */
 .map_button_wrap {
     display: flex;
     gap: 4px;
@@ -690,12 +689,10 @@ input[type="radio"] {
     white-space: nowrap;
 }
 
-/* ========== map content ========== */
-/* << 공항연직시계열 >> */
+/* 기본은 숨김, .active가 붙었을 때만 flex로 노출 (아래 .map_content.active 참고) */
 .map_content {
     display: none !important;
     width: 100%;
-    display: flex;
     border: 1px solid #ddd;
 }
 
@@ -744,7 +741,7 @@ input[type="radio"] {
     flex: 1;
 }
 
-/* << SIGNET / AIRMET >> */
+/* << SIGMET / AIRMET >> */
 .SIG_AIR_content>div {
     width: 50%;
     display: flex;
@@ -759,7 +756,6 @@ input[type="radio"] {
     margin: 0 auto;
 }
 
-/* table(?) */
 .sig_info,
 .air_info {
     width: 100%;
@@ -816,7 +812,8 @@ input[type="radio"] {
 }
 
 .SIGWX_content .sigwx-mid-form-box input[type="radio"],
-.WINTEM_content .wintem-form-box input[type="radio"] {
+.WINTEM_content .wintem-form-box input[type="radio"],
+.WIND_TEMP_content .sigwx-mid-form-box input[type="radio"] {
     display: none !important;
 }
 
@@ -942,7 +939,6 @@ input[type="radio"] {
     height: 100%;
     display: flex;
     align-items: center;
-    /* margin-left: 1rem; */
 }
 
 .play-buttons-wrap .left-btn {
@@ -1060,7 +1056,6 @@ input[type="radio"] {
     }
 }
 
-
 /* << 공항기상정보 >> */
 .Airport_Weather_content,
 .TRF_content {
@@ -1086,7 +1081,6 @@ input[type="radio"] {
     display: flex;
     gap: 4px;
     align-items: center;
-
 }
 
 .download-btn {
@@ -1102,14 +1096,9 @@ input[type="radio"] {
 }
 
 /* << 이륙예상 >> */
-/* .TRF_content {
-    flex-direction: column;
-} */
-
 .TRF_content .m-b-30 {
     margin-bottom: 0px;
 }
-
 
 /* << 상세바람기온 >> */
 .WIND_TEMP_content>div {
@@ -1149,7 +1138,6 @@ input[type="radio"] {
 .WIND_TEMP_content>div>div:last-child img {
     width: 70%;
 }
-
 
 /* << METAR/TAF >> */
 .METAR_TAF_content {
@@ -1197,17 +1185,20 @@ input[type="radio"] {
     padding: 8px;
 }
 
-.port-info .metar {
+.port-info .metar,
+.port-info .met-report {
     border-bottom: 1px solid #ddd;
 }
 
 .matar_title,
+.met_report_title,
 .taf_title {
     width: 100px;
     padding: 8px;
 }
 
 .metar_info,
+.met_report_info,
 .taf_info {
     flex: 1;
     text-align: start;
@@ -1216,11 +1207,9 @@ input[type="radio"] {
 }
 
 
-
 /* ================================================
-    map content_modal
-    =============================================== */
-/* 모달 공통 */
+   map content_modal (모달 공통)
+   ================================================ */
 .modal-overlay {
     display: none;
     position: fixed;
@@ -1242,7 +1231,6 @@ input[type="radio"] {
     transform: translate(-50%, -50%);
     background: #fff;
     border-radius: 12px;
-    /* width: 40%; */
     max-height: 90vh;
     display: flex;
     flex-direction: column;
@@ -1291,13 +1279,12 @@ input[type="radio"] {
     min-width: 80px;
     padding: 10px;
     background: none;
-    border: none;
-    cursor: pointer;
-    color: #666;
     border: 1px solid #ddd;
     border-bottom: none;
     border-radius: 8px 8px 0 0;
     margin-bottom: -1px;
+    cursor: pointer;
+    color: #666;
 }
 
 .modal-tab.active {
@@ -1330,11 +1317,11 @@ input[type="radio"] {
 
 
 /* ================================================
-    국내공항 여행 날씨
-    =============================================== */
-/* header */
+   국내공항 여행 날씨
+   ================================================ */
 .sub-text-input {
-    width: 100%;
+    width: auto;
+    gap: 4px;
 }
 
 .text-box {
@@ -1344,10 +1331,6 @@ input[type="radio"] {
 .airportweather-world-search {
     gap: 4px;
     justify-content: center;
-}
-
-.airportweather-world-label {
-    width: auto !important;
 }
 
 .airportweather-world-search>input {
@@ -1366,7 +1349,6 @@ input[type="radio"] {
     cursor: pointer;
 }
 
-/* content */
 .now_state_wrap {
     width: 100%;
     display: flex;
@@ -1389,7 +1371,6 @@ input[type="radio"] {
 .state_content>div:last-child {
     border-bottom: none;
 }
-
 
 .state_text {
     display: flex;
@@ -1455,10 +1436,6 @@ thead {
     background: #FAFBFC;
 }
 
-/* thead {
-    border: none !important;
-} */
-
 .arrive_container table {
     border: none !important;
 }
@@ -1484,13 +1461,8 @@ th {
 
 
 /* ================================================
-    건의 게시판
-    =============================================== */
-.sub-text-input {
-    width: auto;
-    gap: 4px;
-}
-
+   건의 게시판
+   ================================================ */
 .notice-wrap,
 .notice-conut,
 .write-radio_wrap {
@@ -1505,7 +1477,6 @@ th {
 .notice-conut {
     font-size: 15px;
     color: #969696;
-    ;
 }
 
 .count-form-box {
@@ -1531,8 +1502,6 @@ th {
 }
 
 /* --- table --- */
-/* notice css */
-
 .write-table {
     display: flex;
     align-items: flex-start;
@@ -1649,9 +1618,6 @@ th {
     border-bottom: 1px solid #ddd;
 }
 
-
-
-
 /* ===== check_write ===== */
 .details-file-info {
     display: flex;
@@ -1697,21 +1663,20 @@ th {
     font-family: sans-serif;
 }
 
+.comment-form {
+    display: flex;
+}
+
 .comment-form textarea {
     width: 100%;
     height: 30px;
-    resize: none !important;
+    resize: vertical;
     align-content: center;
     padding: 0 10px;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 0.25em;
-    resize: vertical;
     font-size: 14px;
-}
-
-.comment-form {
-    display: flex;
 }
 
 .comment-form button {
@@ -1750,8 +1715,6 @@ th {
     background-color: #78b5ff;
 }
 
-
-
 /* 글쓰기 */
 .write-details-box {
     border: 1px solid #ddd;
@@ -1777,7 +1740,6 @@ th {
 
 .write_title input {
     flex-grow: 1;
-    /* margin: 4px 8px; */
     border: none;
     padding: 0 8px;
     font-size: 13px;
@@ -1787,11 +1749,11 @@ th {
 .write_content textarea:focus {
     border: none;
     box-shadow: none;
-
 }
 
 .write_content textarea:focus {
     outline: 1px solid #27416B;
+    color: #111;
 }
 
 .write_title input::placeholder {
@@ -1813,16 +1775,10 @@ th {
     flex-grow: 1;
     height: 400px;
     resize: none !important;
-    /* margin: 4px 8px; */
     border: none;
     padding: 8px;
     font-size: 13px;
 }
-
-.write_content textarea:focus {
-    color: #111;
-}
-
 
 /* FILE DROP ZONE */
 .file_drop_zone {
@@ -1871,9 +1827,11 @@ th {
     color: #969696;
 }
 
-/* ===== 반응형 ----- */
-@media (max-width: 1024px) {
 
+/* ================================================
+   반응형
+   ================================================ */
+@media (max-width: 1024px) {
     /* header */
     .airep-form-box,
     .sub-text-input {
@@ -1908,9 +1866,7 @@ th {
     }
 }
 
-
 @media (max-width: 768px) {
-
     /* footer */
     .footer .footer-menu .footer-menulist {
         display: flex;

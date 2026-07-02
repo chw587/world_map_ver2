@@ -1,12 +1,15 @@
+// ================================================
 // 직항 / 경유 선택
+// ================================================
 function toggleStopover(radio) {
     const stopoverBox = document.getElementById('stopover-box');
     const middleMap = document.querySelector('.middle_map');
     const middlePort = document.querySelector('.middle_port');
     const modal_middleTab = document.querySelector('#meteogram-modal .modal-tab:nth-child(2)');
     const modal_middleMap = document.querySelector('#meteogram-modal .tab-panel:nth-child(2)');
+    const isStopover = radio.value === 'stopover';
 
-    if (radio.value === 'stopover') {
+    if (isStopover) {
         if (stopoverBox) stopoverBox.style.display = '';
         if (middleMap) middleMap.style.display = '';
         if (middlePort) middlePort.style.display = '';
@@ -23,10 +26,68 @@ function toggleStopover(radio) {
         if (modal_middleMap) modal_middleMap.style.display = 'none';
     }
 
+    syncAirportWeatherStopover(isStopover);
     syncRouteViewState();
 }
 
+function setAirportWeatherPage(value) {
+    document.querySelectorAll('.pdf-pages').forEach(function (page) {
+        page.style.display = 'none';
+    });
+
+    const targetPage = document.getElementById(value + '-pages');
+    if (targetPage) {
+        targetPage.style.display = 'block';
+    }
+}
+
+function syncAirportWeatherStopover(isStopover) {
+    const airportWeatherMiddlePort = document.querySelector('.Airport_Weather_content .middle-port');
+    const middleFlightPortRadio = airportWeatherMiddlePort
+        ? airportWeatherMiddlePort.querySelector('input[name="flightPort"]')
+        : null;
+
+    if (airportWeatherMiddlePort) {
+        airportWeatherMiddlePort.style.display = isStopover ? '' : 'none';
+    }
+
+    if (!isStopover && middleFlightPortRadio && middleFlightPortRadio.checked) {
+        const startFlightPortRadio = document.querySelector('.Airport_Weather_content input[name="flightPort"][value="start"]');
+        if (startFlightPortRadio) {
+            startFlightPortRadio.checked = true;
+        }
+        setAirportWeatherPage('start');
+    }
+}
+
+function initFlightTypeOptionClicks() {
+    document.querySelectorAll('#route-search-form .sub_radio').forEach(function (option) {
+        const radio = option.querySelector('input[name="flightType"]');
+        if (!radio) return;
+
+        option.addEventListener('click', function () {
+            selectFlightTypeOption(option);
+        });
+    });
+}
+
+function selectFlightTypeOption(option) {
+    const radio = option ? option.querySelector('input[name="flightType"]') : null;
+    if (!radio) return;
+
+    if (!radio.checked) {
+        radio.checked = true;
+    }
+    toggleStopover(radio);
+}
+
+window.toggleStopover = toggleStopover;
+window.selectFlightTypeOption = selectFlightTypeOption;
+
+
+// ================================================
 // 지도 오픈
+// ================================================
 const mapOpenWrap = document.querySelector('.map-open-wrap');
 const worldMapWrap = document.querySelector('.world_map_wrap');
 const openTitle = document.getElementById('map_openTitle');
@@ -59,12 +120,18 @@ function setWorldMapOpen(isOpen) {
     }
 }
 
-if (mapOpenWrap && worldMapWrap) {
-    mapOpenWrap.addEventListener('click', () => {
-        setWorldMapOpen(!worldMapWrap.classList.contains('is-open'));
-    });
+function initMapOpenToggle() {
+    if (mapOpenWrap && worldMapWrap) {
+        mapOpenWrap.addEventListener('click', () => {
+            setWorldMapOpen(!worldMapWrap.classList.contains('is-open'));
+        });
+    }
 }
 
+
+// ================================================
+// 출발/경유/도착 공항 값 & 경로 상태
+// ================================================
 function getRouteInputs() {
     const routeForm = document.getElementById('route-search-form');
     if (!routeForm) return [];
@@ -91,6 +158,38 @@ function hasRequiredRoute() {
     return route.start !== '' && route.arrive !== '' && (!isStopoverRoute() || route.stopover !== '');
 }
 
+function isDomesticAirport(icao) {
+    return /^RK[A-Z0-9]{2}$/.test((icao || '').trim().toUpperCase());
+}
+
+function syncMetReport(port, icao) {
+    const portInfo = port.querySelector('.port-info');
+    if (!portInfo) return;
+
+    const oldMetReport = portInfo.querySelector('.met-report');
+    if (oldMetReport) {
+        oldMetReport.remove();
+    }
+
+    if (!isDomesticAirport(icao)) return;
+
+    const metReport = document.createElement('div');
+    metReport.className = 'met-report';
+    metReport.innerHTML = `
+        <div class="met_report_title">MET REPORT</div>
+        <div class="met_report_info">
+            <p>MET REPORT ${icao} 210730Z WIND 22012KT VIS 10KM CLD CAVOK T 12 DP 07 QNH 1017HPA=</p>
+        </div>
+    `;
+
+    const tafBlock = portInfo.querySelector('.taf');
+    if (tafBlock) {
+        portInfo.insertBefore(metReport, tafBlock);
+    } else {
+        portInfo.appendChild(metReport);
+    }
+}
+
 function setRoutePortContent(selector, icao) {
     const port = document.querySelector(selector);
     if (!port || !icao) return;
@@ -115,6 +214,8 @@ function setRoutePortContent(selector, icao) {
             <p>BECMG 2210/2212 34007KT=</p>
         `;
     }
+
+    syncMetReport(port, icao);
 }
 
 function syncRouteMetarTafContent() {
@@ -187,6 +288,10 @@ function initRouteQueryValues() {
     routeSearchCommitted = false;
 }
 
+
+// ================================================
+// 공항 검색/선택 패널 (경로 입력용)
+// ================================================
 function initAirportListPanel() {
     const routeForm = document.getElementById('route-search-form');
     const panel = document.getElementById('route-airport-panel');
@@ -712,27 +817,29 @@ function initAirportListPanel() {
     renderAirportHistory();
 }
 
-initRouteQueryValues();
-initAirportListPanel();
-syncRouteViewState();
 
+// ================================================
+// 탭 버튼 전환 (연직시계열 / SIGMET·AIRMET 등)
+// ================================================
+function initMapTabButtons() {
+    document.querySelectorAll('.map_button_wrap button').forEach(button => {
+        button.addEventListener('click', function () {
+            document.querySelectorAll('.map_button_wrap button').forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
 
+            const tab = this.dataset.tab;
+            const targetContent = document.querySelector('.' + tab + '_content');
 
-// 탭 버튼 전환
-document.querySelectorAll('.map_button_wrap button').forEach(button => {
-    button.addEventListener('click', function () {
-        document.querySelectorAll('.map_button_wrap button').forEach(btn => btn.classList.remove('active'));
-        this.classList.add('active');
-
-        const tab = this.dataset.tab;
-
-        document.querySelectorAll('.map_content').forEach(content => content.classList.remove('active'));
-        document.querySelector('.' + tab + '_content').classList.add('active');
+            document.querySelectorAll('.map_content').forEach(content => content.classList.remove('active'));
+            if (targetContent) targetContent.classList.add('active');
+        });
     });
-});
+}
 
 
-//  모달창
+// ================================================
+// 모달창 (메테오그램 / SIGMET·AIRMET)
+// ================================================
 function openModal(modalId, tabIndex) {
     document.getElementById(modalId).classList.add('open');
     switchModalTab(modalId, tabIndex);
@@ -748,30 +855,38 @@ function switchModalTab(modalId, index) {
     modal.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === index));
 }
 
-/* ── 오버레이 클릭 시 닫기 ── */
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', function (e) {
-        if (e.target === this) closeModal(this.id);
-    });
-});
-
-
-// 공항기상정보 라디오 페이지 전환
-document.querySelectorAll('input[name="flightPort"]').forEach(function(radio) {
-    radio.addEventListener('change', function() {
-        // 모든 pdf-pages 숨기기
-        document.querySelectorAll('.pdf-pages').forEach(function(page) {
-            page.style.display = 'none';
+// 오버레이 클릭 시 닫기
+function initModalOverlayClose() {
+    document.querySelectorAll('.modal-overlay').forEach(overlay => {
+        overlay.addEventListener('click', function (e) {
+            if (e.target === this) closeModal(this.id);
         });
-
-        // 선택된 값에 따라 해당 페이지 보이기
-        const value = this.value;
-        if (value === 'start') {
-            document.getElementById('start-pages').style.display = 'block';
-        } else if (value === 'middle') {
-            document.getElementById('middle-pages').style.display = 'block';
-        } else if (value === 'arrive') {
-            document.getElementById('arrive-pages').style.display = 'block';
-        }
     });
-});
+}
+
+
+// ================================================
+// 공항기상정보 라디오 - 출발/경유/도착 페이지 전환
+// ================================================
+function initAirportWeatherPortRadios() {
+    document.querySelectorAll('input[name="flightPort"]').forEach(function (radio) {
+        radio.addEventListener('change', function () {
+            setAirportWeatherPage(this.value);
+        });
+    });
+}
+
+
+// ================================================
+// 초기화
+// ================================================
+initRouteQueryValues();
+initFlightTypeOptionClicks();
+initAirportListPanel();
+initMapOpenToggle();
+initMapTabButtons();
+initModalOverlayClose();
+initAirportWeatherPortRadios();
+
+syncAirportWeatherStopover(isStopoverRoute());
+syncRouteViewState();
