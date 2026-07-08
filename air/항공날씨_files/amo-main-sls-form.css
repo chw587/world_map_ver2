@@ -103,6 +103,7 @@
     padding: 0 10px;
     box-sizing: border-box;
     border-radius: 0;
+    font-size: 13px;
 }
 
 #airport-list-modal .main_sls_form .input_box input:focus {
@@ -184,6 +185,7 @@
     padding: 0;
     border-radius: 0;
     box-shadow: none;
+    font-size: 13px;
 }
 
 #airport-list-modal .airport-search-result li {
@@ -195,7 +197,7 @@
     padding: 8px 10px;
     position: relative;
     color: inherit;
-    font-size: 13px;
+    font-size: inherit;
 }
 
 #airport-list-modal .airport-search-result li a:hover,
@@ -223,6 +225,7 @@
 #airport-list-modal .airport-search-result li span.no-airports {
     padding: 5px 20px;
     display: block;
+    font-size: inherit;
 }
 
 #airport-list-modal .airport-query-history a {

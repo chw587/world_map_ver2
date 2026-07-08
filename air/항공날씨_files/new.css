@@ -587,57 +587,6 @@ input[type="radio"] {
     word-break: break-word;
 }
 
-/* 희원-확대축소 */
-.sigair-zoom {
-    --sigair-zoom-scale: 1;
-    position: relative;
-    width: 50%;
-    max-height: 520px;
-    border-radius: 8px;
-    background: #f3f5f8;
-    overflow: auto;
-}
-
-.sigair-zoom-image {
-    display: block;
-    width: calc(100% * var(--sigair-zoom-scale));
-    min-width: 100%;
-    height: auto;
-    border-radius: 8px;
-    transform-origin: top left;
-    user-select: none;
-}
-
-.sigair-zoom-controls {
-    position: sticky;
-    top: 8px;
-    z-index: 2;
-    display: flex;
-    justify-content: flex-end;
-    gap: 4px;
-    padding: 8px;
-    pointer-events: none;
-}
-
-.sigair-zoom-controls button {
-    min-width: 32px;
-    height: 28px;
-    border: 1px solid #c7d0dc;
-    border-radius: 4px;
-    background: rgba(255, 255, 255, 0.94);
-    color: #173f79;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    pointer-events: auto;
-}
-
-.sigair-zoom-controls button:hover,
-.sigair-zoom-controls button:focus {
-    border-color: #173f79;
-    background: #eef4fb;
-}
-
 /* << SIGWX / WINTEM >> */
 .SIGWX_content img,
 .WINTEM_content img {
@@ -1113,6 +1062,10 @@ input[type="radio"] {
     width: 70%;
 }
 
+#sigmet-airmet-modal .modal-box .tab-panel>* {
+    width: 50%;
+}
+
 .modal-box .modal-header {
     display: flex;
     align-items: center;
@@ -1165,7 +1118,7 @@ input[type="radio"] {
 
 .modal-body {
     flex: 1;
-        padding: 16px;
+    padding: 16px;
     border-radius: 0 0 12px 12px !important;
     overflow-y: auto;
 }
@@ -1179,7 +1132,7 @@ input[type="radio"] {
 }
 
 #airport-list-modal .modal-body {
-    padding : 16px
+    padding: 16px
 }
 
 #airport-list-modal .modal-box {
@@ -1212,6 +1165,95 @@ input[type="radio"] {
     display: flex;
 }
 
+.zoom-box {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+}
+
+.zoom-img {
+    width: 100%;
+    overflow: hidden;
+    cursor: default;
+    touch-action: none;
+}
+
+.zoom-img img {
+    display: block;
+    width: 100%;
+    transform-origin: 0 0;
+    transition: transform 0.15s ease;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+.zoom-img.is-zoomed {
+    cursor: grab;
+}
+
+.zoom-img.is-dragging {
+    cursor: grabbing;
+}
+
+.zoom-img.is-dragging img {
+    transition: none;
+}
+
+.zoom-box>.jvectormap-zoomin,
+.zoom-box>.jvectormap-zoomout {
+    position: absolute;
+    z-index: 10;
+    right: 10px;
+    left: auto;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    color: #0d3871;
+    background: #fff;
+    border: 1px solid #b8c9e2;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 26px;
+    text-align: center;
+    cursor: pointer;
+    box-sizing: border-box;
+    transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.zoom-box>.jvectormap-zoomin {
+    top: 10px;
+}
+
+.zoom-box>.jvectormap-zoomout {
+    top: 42px;
+}
+
+.zoom-box>.jvectormap-zoomin:hover,
+.zoom-box>.jvectormap-zoomout:hover {
+    background: #f3f7ff;
+    border-color: #7c9ccc;
+}
+
+.zom-wrap {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 10;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* .zom-wrap>* {
+    width: 28px;
+    height: 28px;
+    border-radius: 4px;
+    font-size: 16px;
+    border: 1px solid #ddd;
+} */
+
+
 /* ================================================
    국내공항 여행 날씨
    ================================================ */
@@ -1224,7 +1266,7 @@ input[type="radio"] {
     flex: 1;
 }
 
-.airportweather-world-search > input {
+.airportweather-world-search>input {
     position: relative;
     display: flex;
     width: 170px !important;
@@ -1296,7 +1338,7 @@ input[type="radio"] {
     width: 100%;
 }
 
-#airport-list-modal .main_sls_form  button {
+#airport-list-modal .main_sls_form button {
     align-self: flex-end;
     width: fit-content;
 }
@@ -1367,6 +1409,7 @@ input[type="radio"] {
     display: block;
     padding: 8px 12px;
     color: #234;
+    font-size: 13px;
 }
 
 #airport-list-modal .airport-search-result a:hover,
@@ -1845,7 +1888,7 @@ th {
 .write-details-btn {
     width: 100%;
     display: flex;
-    
+
     gap: 4px;
     justify-content: flex-end;
     margin-bottom: 30px;

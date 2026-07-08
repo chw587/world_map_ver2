@@ -16,17 +16,16 @@ function toggleStopover(radio) {
     ];
 
     toggleTargets.forEach(function (el) {
-        if (el) el.style.display = isStopover ? '' : 'none';
-    });
+        if (!el) return;
 
-    if (!isStopover && stopoverBox) {
-        const stopoverInput = stopoverBox.querySelector('input');
-        if (stopoverInput) stopoverInput.value = '';
-    }
-    if (!isStopover && airportListStopoverBox) {
-        const stopoverInput = airportListStopoverBox.querySelector('input');
-        if (stopoverInput) stopoverInput.value = '';
-    }
+        el.style.display = isStopover ? '' : 'none';
+
+        // 직항 전환 시 경유 입력값 초기화 (stopoverBox / airportListStopoverBox만 해당)
+        if (!isStopover && (el === stopoverBox || el === airportListStopoverBox)) {
+            const stopoverInput = el.querySelector('input');
+            if (stopoverInput) stopoverInput.value = '';
+        }
+    });
 
     syncAirportWeatherStopover(isStopover);
     syncRouteViewState();
@@ -906,6 +905,15 @@ function readSelectedAirportFromSelect(wrapper) {
     };
 }
 
+function applySelectedAirportFromSelect(wrapper) {
+    const airport = readSelectedAirportFromSelect(wrapper);
+    if (!airport) return false;
+
+    saveAirportHistory(airport);
+    renderAirportHistory(wrapper);
+    return applyAirportToRoute(airport);
+}
+
 function initAirportSearchForm(wrapper) {
     const keywordType = wrapper.querySelector('a.chk_label[data-name="keyword-type"]');
     const selectType = wrapper.querySelector('a.chk_label[data-name="select-type"]');
@@ -920,9 +928,11 @@ function initAirportSearchForm(wrapper) {
     let lastQuery = '';
     let searchTimer = null;
     let activeResultIndex = -1;
+    let lastSelectApplyIcao = '';
 
     function setType(type) {
         currentType = type;
+        lastSelectApplyIcao = '';
         keywordType?.classList.toggle('active', type === 'keyword-type');
         selectType?.classList.toggle('active', type === 'select-type');
         keywordType?.setAttribute('data-checked', type === 'keyword-type' ? 'true' : 'false');
@@ -961,6 +971,26 @@ function initAirportSearchForm(wrapper) {
             runSearch(1);
             searchTimer = null;
         }, 500);
+    }
+
+    function applySelectAirportChoice() {
+        const airport = readSelectedAirportFromSelect(wrapper);
+        if (!airport) return false;
+
+        if (lastSelectApplyIcao === airport.icao) {
+            return true;
+        }
+
+        lastSelectApplyIcao = airport.icao;
+        selectedAirport = airport;
+        return applySelectedAirportFromSelect(wrapper);
+    }
+
+    function applySingleAirportOption() {
+        const airportSelect = wrapper.querySelector('select[name="airport"]');
+        if (!airportSelect || airportSelect.options.length !== 1 || !airportSelect.value) return false;
+
+        return applySelectAirportChoice();
     }
 
     [keywordType, selectType].forEach(function (link) {
@@ -1054,13 +1084,32 @@ function initAirportSearchForm(wrapper) {
 
     wrapper.querySelectorAll('select[name="country"], select[name="airport"]').forEach(function (select) {
         select.addEventListener('change', function () {
-            if (select.name === 'country') populateAirportOptions(wrapper);
+            if (select.name === 'country') {
+                populateAirportOptions(wrapper);
+                lastSelectApplyIcao = '';
+            }
             selectedAirport = readSelectedAirportFromSelect(wrapper);
             if (select.name === 'airport' && selectedAirport) {
-                saveAirportHistory(selectedAirport);
-                renderAirportHistory(wrapper);
-                applyAirportToRoute(selectedAirport);
+                applySelectAirportChoice();
             }
+        });
+
+        select.addEventListener('mousedown', function () {
+            if (select.name !== 'airport') return;
+
+            applySingleAirportOption();
+        });
+
+        select.addEventListener('click', function () {
+            if (select.name !== 'airport') return;
+
+            applySingleAirportOption();
+        });
+
+        select.addEventListener('keydown', function (event) {
+            if (select.name !== 'airport' || !['Enter', ' '].includes(event.key)) return;
+
+            applySingleAirportOption();
         });
     });
 
@@ -1069,11 +1118,16 @@ function initAirportSearchForm(wrapper) {
             event.preventDefault();
             populateAirportOptions(wrapper);
             selectedAirport = readSelectedAirportFromSelect(wrapper);
+            if (selectedAirport) applySelectAirportChoice();
         });
     });
 
     searchButton?.addEventListener('click', function (event) {
         event.preventDefault();
+
+        if (currentType === 'select-type') {
+            applySelectAirportChoice();
+        }
 
         if (!hasRequiredRoute()) {
             alert('출발공항과 도착공항을 선택하세요.');
@@ -1094,6 +1148,10 @@ function initAirportSearchForm(wrapper) {
         }
     });
 
+    wrapper.closest('#airport-list-modal')?.addEventListener('airport-list-modal:open', function () {
+        lastSelectApplyIcao = '';
+    });
+
     renderAirportHistory(wrapper);
     setType('keyword-type');
 }
@@ -1104,6 +1162,7 @@ function openAirportListModal(index) {
     openModal('airport-list-modal');
 
     const modal = document.getElementById('airport-list-modal');
+    modal?.dispatchEvent(new Event('airport-list-modal:open'));
     const queryInput = modal?.querySelector('.airport-search-keyword input[name="q"]');
     queryInput?.focus();
 }
@@ -1206,43 +1265,130 @@ function initModalOverlayClose() {
     });
 }
 
-// 희원-확대축소
-function initSigairImageZoom() {
-    const MIN_SCALE = 0.5;
-    const MAX_SCALE = 4;
-    const STEP = 0.2;
-
-    document.querySelectorAll('[data-sigair-zoom]').forEach(zoomBox => {
-        let scale = 1;
-
-        function applyZoom(nextScale) {
-            scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, nextScale));
-            zoomBox.style.setProperty('--sigair-zoom-scale', scale.toFixed(2));
-        }
-
-        zoomBox.querySelectorAll('[data-zoom-action]').forEach(button => {
-            button.addEventListener('click', event => {
-                event.preventDefault();
-                event.stopPropagation();
-
-                const action = button.dataset.zoomAction;
-                if (action === 'in') applyZoom(scale + STEP);
-                if (action === 'out') applyZoom(scale - STEP);
-                if (action === 'reset') applyZoom(1);
-            });
-        });
-
-        zoomBox.addEventListener('wheel', event => {
-            event.preventDefault();
-            applyZoom(scale + (event.deltaY < 0 ? STEP : -STEP));
-        }, { passive: false });
-    });
-}
-
-
 // ================================================
 // 공항기상정보 라디오 - 출발/경유/도착 페이지 전환
 // ================================================
+function initZoomImages() {
+    const MIN_SCALE = 1;
+    const MAX_SCALE = 4;
+    const STEP = 0.25;
+
+    document.querySelectorAll('.zoom-box').forEach(function (box) {
+        if (box.dataset.zoomReady === 'true') return;
+
+        const viewport = box.querySelector('.zoom-img');
+        const image = viewport?.querySelector('img');
+        const zoomIn = box.querySelector('.jvectormap-zoomin');
+        const zoomOut = box.querySelector('.jvectormap-zoomout');
+        if (!viewport || !image || !zoomIn || !zoomOut) return;
+
+        let scale = MIN_SCALE;
+        let x = 0;
+        let y = 0;
+        let dragging = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let startX = 0;
+        let startY = 0;
+
+        function clampPosition() {
+            const viewWidth = viewport.clientWidth;
+            const viewHeight = viewport.clientHeight;
+            const imageWidth = image.offsetWidth * scale;
+            const imageHeight = image.offsetHeight * scale;
+            const minX = Math.min(0, viewWidth - imageWidth);
+            const minY = Math.min(0, viewHeight - imageHeight);
+
+            x = Math.max(minX, Math.min(0, x));
+            y = Math.max(minY, Math.min(0, y));
+
+            if (imageWidth <= viewWidth) x = 0;
+            if (imageHeight <= viewHeight) y = 0;
+        }
+
+        function applyZoom() {
+            clampPosition();
+            image.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
+            viewport.classList.toggle('is-zoomed', scale > MIN_SCALE);
+        }
+
+        function setScale(nextScale) {
+            const previousScale = scale;
+            scale = Math.max(MIN_SCALE, Math.min(MAX_SCALE, nextScale));
+
+            if (scale === MIN_SCALE) {
+                x = 0;
+                y = 0;
+            } else if (previousScale !== scale) {
+                const rect = viewport.getBoundingClientRect();
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
+                const ratio = scale / previousScale;
+                x = centerX - (centerX - x) * ratio;
+                y = centerY - (centerY - y) * ratio;
+            }
+
+            applyZoom();
+        }
+
+        zoomIn.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            setScale(scale + STEP);
+        });
+
+        zoomOut.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            setScale(scale - STEP);
+        });
+
+        viewport.addEventListener('wheel', function (event) {
+            event.preventDefault();
+            setScale(scale + (event.deltaY < 0 ? STEP : -STEP));
+        }, { passive: false });
+
+        viewport.addEventListener('pointerdown', function (event) {
+            if (scale <= MIN_SCALE) return;
+
+            event.preventDefault();
+            dragging = true;
+            dragStartX = event.clientX;
+            dragStartY = event.clientY;
+            startX = x;
+            startY = y;
+            viewport.classList.add('is-dragging');
+            viewport.setPointerCapture?.(event.pointerId);
+        });
+
+        viewport.addEventListener('pointermove', function (event) {
+            if (!dragging) return;
+
+            event.preventDefault();
+            x = startX + event.clientX - dragStartX;
+            y = startY + event.clientY - dragStartY;
+            applyZoom();
+        });
+
+        function stopDragging(event) {
+            if (!dragging) return;
+
+            dragging = false;
+            viewport.classList.remove('is-dragging');
+            if (event?.pointerId !== undefined) viewport.releasePointerCapture?.(event.pointerId);
+        }
+
+        viewport.addEventListener('pointerup', stopDragging);
+        viewport.addEventListener('pointercancel', stopDragging);
+        viewport.addEventListener('lostpointercapture', stopDragging);
+        image.addEventListener('load', applyZoom);
+        window.addEventListener('resize', applyZoom);
+
+        box.dataset.zoomReady = 'true';
+        applyZoom();
+    });
+}
+
 function initAirportWeatherPortRadios() {
     document.querySelectorAll('input[name="flightPort"]').forEach(function (radio) {
         radio.addEventListener('change', function () {
@@ -1262,7 +1408,7 @@ initFlightTypeOptionClicks();
 initMapOpenToggle();
 initMapTabButtons();
 initModalOverlayClose();
-initSigairImageZoom();
+initZoomImages();
 initAirportWeatherPortRadios();
 
 syncAirportWeatherStopover(isStopoverRoute());
