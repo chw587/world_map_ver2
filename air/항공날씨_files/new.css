@@ -25,6 +25,19 @@
     display: none;
 }
 
+.text-input {
+    position: relative;
+    display: flex;
+    width: 160px;
+    height: 20px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    border-radius: .25em;
+    overflow: hidden;
+    color: #4d4d4d;
+    padding: 4px 10px;
+}
+
 
 /* ================================================
    세계지도 / GIS 지도
@@ -313,240 +326,6 @@
     display: none;
 }
 
-.route-airport-panel {
-    position: relative;
-    z-index: 2100;
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    transform: translateY(-6px);
-    transition: max-height 0.35s ease, opacity 0.25s ease, transform 0.35s ease;
-}
-
-.route-airport-panel.is-open {
-    max-height: 120px;
-    overflow: visible;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.route-airport-panel-inner {
-    position: relative;
-    display: grid;
-    grid-template-columns: 104px minmax(360px, 1fr);
-    gap: 16px;
-    align-items: center;
-    min-height: 106px;
-    margin: 0 0 12px;
-    padding: 16px;
-    border: 0;
-    border-radius: 0;
-    background: #f8fafc;
-    box-shadow: none;
-}
-
-.route-airport-close-btn {
-    position: absolute;
-    top: 6px;
-    right: 112px;
-    width: 24px;
-    height: 24px;
-    border: 1px solid #d5d5d5;
-    background: #fff;
-    color: #333;
-    font-size: 18px;
-    line-height: 20px;
-    cursor: pointer;
-}
-
-.route-airport-close-btn:hover,
-.route-airport-close-btn:focus {
-    border-color: #173f79;
-    color: #173f79;
-}
-
-.route-airport-options {
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-}
-
-.route-airport-option {
-    margin: 0;
-}
-
-.route-airport-option .chk_label {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: #111;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1;
-    text-decoration: none;
-}
-
-.route-check-mark {
-    position: relative;
-    display: inline-block;
-    width: 24px;
-    height: 24px;
-    border: 1px solid #333;
-    background: #fff;
-    box-sizing: border-box;
-}
-
-.route-airport-option .chk_label.active .route-check-mark::after {
-    content: "";
-    position: absolute;
-    left: 6px;
-    top: 2px;
-    width: 8px;
-    height: 14px;
-    border-right: 2px solid #333;
-    border-bottom: 2px solid #333;
-    transform: rotate(45deg);
-}
-
-.route-airport-main {
-    display: grid;
-    grid-template-columns: minmax(360px, 1fr) 88px;
-    gap: 16px;
-    align-items: stretch;
-}
-
-.route-airport-panel .airport-search-keyword {
-    position: relative;
-    margin: 0;
-}
-
-.route-airport-panel .airport-search-keyword input,
-.route-airport-panel .main-select-option {
-    width: 100%;
-    height: 32px;
-    padding: 4px 12px;
-    border: 1px solid #d5d5d5;
-    border-radius: 0;
-    color: #555;
-    font-size: 13px;
-    box-sizing: border-box;
-}
-
-.route-airport-panel .airport-search-result {
-    display: none;
-    position: absolute;
-    z-index: 20;
-    top: 35px;
-    left: 0;
-    right: 0;
-    max-height: 210px;
-    margin: 0;
-    padding: 4px 0;
-    border: 1px solid #d5d5d5;
-    background: #fff;
-    box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
-    overflow-y: auto;
-}
-
-.route-airport-panel .airport-search-result li {
-    margin: 0;
-}
-
-.route-airport-panel .airport-search-result a,
-.route-airport-panel .airport-search-result span {
-    display: block;
-    padding: 7px 12px;
-    color: #111;
-    font-size: 12px;
-    line-height: 1.35;
-    text-decoration: none;
-}
-
-.route-airport-panel .airport-search-result a:hover,
-.route-airport-panel .airport-search-result a:focus {
-    background: #eef4fb;
-    color: #173f79;
-}
-
-.route-airport-panel .search_text {
-    margin: 7px 0 0;
-    color: #111;
-    font-size: 12px;
-    line-height: 1.2;
-}
-
-.route-airport-panel .airport-search-select {
-    display: grid;
-    grid-template-columns: minmax(150px, 0.5fr) minmax(220px, 1fr);
-    gap: 8px;
-    align-items: start;
-    margin: 0;
-}
-
-.route-airport-panel .airport-search-select>div {
-    display: grid;
-    grid-template-columns: auto minmax(120px, 1fr);
-    gap: 6px;
-    align-items: center;
-}
-
-.route-airport-panel .airport-search-select label {
-    color: #111;
-    font-size: 12px;
-    white-space: nowrap;
-}
-
-.route-airport-panel .airport-search-select .search_text {
-    grid-column: 1 / -1;
-    margin-top: -1px;
-}
-
-.route-airport-panel .airport-query-history a {
-    color: #111;
-    text-decoration: none;
-}
-
-.route-airport-panel .airport-query-history a:hover {
-    text-decoration: underline;
-}
-
-.route-airport-search-btn {
-    width: 88px;
-    height: 74px;
-    border: 0;
-    background: #173f79;
-    color: #fff;
-    font-size: 14px;
-    font-weight: 700;
-    cursor: pointer;
-}
-
-@media (max-width: 768px) {
-    .route-airport-panel.is-open {
-        max-height: 220px;
-    }
-
-    .route-airport-close-btn {
-        top: 10px;
-        right: 10px;
-    }
-
-    .route-airport-panel-inner,
-    .route-airport-main {
-        grid-template-columns: 1fr;
-    }
-
-    .route-airport-options {
-        flex-direction: row;
-        gap: 18px;
-    }
-
-    .route-airport-search-btn {
-        width: 100%;
-        height: 38px;
-    }
-}
-
 /* 경로 헤더 */
 .sub_radio_wrap,
 .sub_radio_wrap>div,
@@ -560,11 +339,21 @@
     border-right: 1px solid #ddd;
 }
 
+.sigwx-radiobtn-box,
+.wintem-radiobtn-box {
+    gap: 8px;
+    padding: 2px 16px;
+}
+
+.sigwx-radiobtn {
+    display: flex;
+    gap: 4px;
+}
+
 input[type="radio"] {
-    /* display: none !important; */
-    width: auto;
+    width: auto !important;
     height: auto;
-    appearance: auto;
+    appearance: auto !important;
 }
 
 .btn_wrap>button {
@@ -696,7 +485,7 @@ input[type="radio"] {
     border: 1px solid #ddd;
 }
 
-.map_content > * {
+.map_content>* {
     width: 100%;
 }
 
@@ -798,6 +587,57 @@ input[type="radio"] {
     word-break: break-word;
 }
 
+/* 희원-확대축소 */
+.sigair-zoom {
+    --sigair-zoom-scale: 1;
+    position: relative;
+    width: 50%;
+    max-height: 520px;
+    border-radius: 8px;
+    background: #f3f5f8;
+    overflow: auto;
+}
+
+.sigair-zoom-image {
+    display: block;
+    width: calc(100% * var(--sigair-zoom-scale));
+    min-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    transform-origin: top left;
+    user-select: none;
+}
+
+.sigair-zoom-controls {
+    position: sticky;
+    top: 8px;
+    z-index: 2;
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: 8px;
+    pointer-events: none;
+}
+
+.sigair-zoom-controls button {
+    min-width: 32px;
+    height: 28px;
+    border: 1px solid #c7d0dc;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.94);
+    color: #173f79;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+.sigair-zoom-controls button:hover,
+.sigair-zoom-controls button:focus {
+    border-color: #173f79;
+    background: #eef4fb;
+}
+
 /* << SIGWX / WINTEM >> */
 .SIGWX_content img,
 .WINTEM_content img {
@@ -811,13 +651,19 @@ input[type="radio"] {
     width: 100%;
 }
 
-.SIGWX_content .sigwx-mid-form-box input[type="radio"],
+/* .SIGWX_content .sigwx-mid-form-box input[type="radio"],
 .WINTEM_content .wintem-form-box input[type="radio"],
 .WIND_TEMP_content .sigwx-mid-form-box input[type="radio"] {
     display: none !important;
+} */
+
+.area-radio {
+    display: flex;
+    gap: 4px;
+    align-items: center;
 }
 
-/* 희원 260702 */
+/* 260702 */
 /* 진행-bar */
 .control-movi-wrap {
     width: 100%;
@@ -849,7 +695,6 @@ input[type="radio"] {
 }
 
 .control-movi-lap .movi-line {
-    /* background:url(../../images/move-bar.png)no-repeat bottom; */
     background-size: 100% 100%;
     position: absolute;
     width: 100%;
@@ -878,7 +723,7 @@ input[type="radio"] {
     transform: rotateZ(180deg);
 }
 
-.control-movi-wrap .prev-btn + .start-btn {
+.control-movi-wrap .prev-btn+.start-btn {
     margin-left: 5px;
 }
 
@@ -891,7 +736,7 @@ input[type="radio"] {
     margin-top: 23px;
 }
 
-.control-movi-wrap .next-btn + .control-movi-lap {
+.control-movi-wrap .next-btn+.control-movi-lap {
     left: 140px;
     width: calc(100% - 160px);
 }
@@ -1173,6 +1018,29 @@ input[type="radio"] {
     border-radius: 12px;
 }
 
+.port-name {
+    max-width: 110px;
+    text-align: center;
+    line-height: 1.35;
+}
+
+.port-name span {
+    display: block;
+}
+
+.port-name span:first-child {
+    font-size: 13px;
+    color: #000;
+}
+
+.port-name span:nth-child(2) {
+    margin-top: 4px;
+    color: #27416B;
+    font-size: 12px;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
+}
+
 .port-info {
     flex: 1;
     display: flex;
@@ -1234,11 +1102,11 @@ input[type="radio"] {
     max-height: 90vh;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
 }
 
-#meteogram-modal .modal-box {
-    width: 40%;
+#meteogram-modal .modal-box,
+#airport-list-modal .modal-box {
+    width: 40% !important;
 }
 
 #sigmet-airmet-modal .modal-box {
@@ -1250,6 +1118,7 @@ input[type="radio"] {
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
+    border-radius: 12px 12px 0 0;
     border-bottom: 1px solid #ddd;
     background: #F7F9FC;
     margin-bottom: 8px;
@@ -1296,6 +1165,8 @@ input[type="radio"] {
 
 .modal-body {
     flex: 1;
+        padding: 16px;
+    border-radius: 0 0 12px 12px !important;
     overflow-y: auto;
 }
 
@@ -1307,6 +1178,32 @@ input[type="radio"] {
     padding: 24px;
 }
 
+#airport-list-modal .modal-body {
+    padding : 16px
+}
+
+#airport-list-modal .modal-box {
+    max-height: none !important;
+    overflow: visible !important;
+}
+
+#airport-list-modal .modal-body {
+    flex: none !important;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+}
+
+#airport-list-modal .modal-tabs,
+#airport-list-modal .main_sls_form,
+#airport-list-modal .main_sls_form>div:first-child,
+#airport-list-modal .main_sls_form .input_box,
+#airport-list-modal .main_sls_form .airport-search-keyword {
+    overflow: visible !important;
+}
+
 .tab-panel {
     display: none;
 }
@@ -1314,7 +1211,6 @@ input[type="radio"] {
 .tab-panel.active {
     display: flex;
 }
-
 
 /* ================================================
    국내공항 여행 날씨
@@ -1328,13 +1224,201 @@ input[type="radio"] {
     flex: 1;
 }
 
+.airportweather-world-search > input {
+    position: relative;
+    display: flex;
+    width: 170px !important;
+    height: 20px;
+    font-size: 12px;
+    border: 1px solid #ddd;
+    border-radius: .25em;
+    overflow: hidden;
+    color: #4d4d4d;
+    padding: 4px 10px;
+}
+
 .airportweather-world-search {
     gap: 4px;
     justify-content: center;
 }
 
+.sub-text-input .airportweather-world-search {
+    position: relative;
+}
+
 .airportweather-world-search>input {
-    width: 100px;
+    width: 170px;
+}
+
+.sub-text-input .route-airport-suggest-list {
+    display: none;
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    width: max(220px, 100%);
+    max-height: 220px;
+    overflow-y: auto;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border: 1px solid #ddd;
+    background: #fff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+    z-index: 20;
+}
+
+.sub-text-input .route-airport-suggest-list a {
+    display: block;
+    padding: 8px 10px;
+    color: #234;
+    font-size: 12px;
+    line-height: 1.3;
+    text-decoration: none;
+    white-space: normal;
+}
+
+.sub-text-input .route-airport-suggest-list a:hover,
+.sub-text-input .route-airport-suggest-list a:focus,
+.sub-text-input .route-airport-suggest-list a.is-keyboard-active {
+    background: #F2F7FD;
+    color: #1e5f9f;
+}
+
+#airport-list-modal .modal-tabs .airportweather-world-search {
+    margin-bottom: 8px;
+}
+
+#airport-list-modal .main_sls_form {
+    display: flex;
+    flex-direction: column;
+    justify-content: end;
+    gap: 8px;
+    width: 100%;
+}
+
+#airport-list-modal .main_sls_form  button {
+    align-self: flex-end;
+    width: fit-content;
+}
+
+#airport-list-modal .chk_box {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 0px;
+}
+
+#airport-list-modal .input_chk {
+    margin: 0;
+}
+
+#airport-list-modal .chk_label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 34px;
+    padding: 0 14px;
+    border: 1px solid #ccd7e5;
+    border-radius: 4px;
+    color: #345;
+    background: #fff;
+}
+
+#airport-list-modal .chk_label.active {
+    border-color: #2D6FB7;
+    background: #2D6FB7;
+    color: #fff;
+}
+
+#airport-list-modal .input_box {
+    position: relative;
+}
+
+#airport-list-modal .airport-search-keyword input[name="q"] {
+    width: 100%;
+    height: 42px;
+    border: 1px solid #ccd7e5;
+    border-radius: 4px;
+    padding: 0 12px;
+}
+
+#airport-list-modal .airport-search-result {
+    display: none;
+    position: absolute;
+    top: 44px;
+    left: 0;
+    right: 0;
+    z-index: 2;
+    max-height: 260px;
+    margin: 0;
+    padding: 6px 0;
+    overflow-y: auto;
+    border: 1px solid #ccd7e5;
+    border-radius: 4px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(20, 35, 55, 0.12);
+}
+
+#airport-list-modal .airport-search-result li {
+    list-style: none;
+}
+
+#airport-list-modal .airport-search-result a,
+#airport-list-modal .airport-search-result span {
+    display: block;
+    padding: 8px 12px;
+    color: #234;
+}
+
+#airport-list-modal .airport-search-result a:hover,
+#airport-list-modal .airport-search-result a.is-keyboard-active {
+    background: #F2F7FD;
+    color: #1e5f9f;
+}
+
+#airport-list-modal .airport-search-select>div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+#airport-list-modal .airport-search-select b {
+    width: 80px;
+    flex: 0 0 80px;
+}
+
+#airport-list-modal .airport-search-select select {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    border: 1px solid #ccd7e5;
+    border-radius: 4px;
+}
+
+#airport-list-modal .btn-select,
+#airport-list-modal .button_box button {
+    height: 38px;
+    border: 0;
+    border-radius: 4px;
+    padding: 0 14px;
+    background: #2D6FB7;
+    color: #fff;
+    cursor: pointer;
+}
+
+#airport-list-modal .button_box {
+    margin-top: 14px;
+    text-align: right;
+}
+
+#airport-list-modal .search_text {
+    margin-top: 12px;
+    color: #667;
+}
+
+#airport-list-modal .airport-query-history a {
+    color: #1e5f9f;
+    text-decoration: underline;
 }
 
 .map-open-wrap {
@@ -1348,6 +1432,7 @@ input[type="radio"] {
     white-space: nowrap;
     cursor: pointer;
 }
+
 
 .now_state_wrap {
     width: 100%;
@@ -1540,69 +1625,22 @@ th {
     width: 15px;
 }
 
-.write-table>table>thead>tr>th:nth-child(1) {
+/* 열 너비: 2번째 컬럼(제목)만 50%, 나머지는 10%씩 */
+.write-table>table>thead>tr>th,
+.write-table>table>tbody>tr>td {
     width: 10%;
-    border-right: 0;
 }
 
-.write-table>table>thead>tr>th:nth-child(2) {
+.write-table>table>thead>tr>th:nth-child(2),
+.write-table>table>tbody>tr>td:nth-child(2) {
     width: 50%;
-    border-right: 0;
-}
-
-.write-table>table>thead>tr>th:nth-child(3) {
-    width: 10%;
-    border-right: 0;
-}
-
-.write-table>table>thead>tr>th:nth-child(4) {
-    width: 10%;
-    border-right: 0;
-}
-
-.write-table>table>thead>tr>th:nth-child(5) {
-    width: 10%;
-    border-right: 0;
-}
-
-.write-table>table>thead>tr>th:nth-child(6) {
-    width: 10%;
-    border-right: 0;
-}
-
-.write-table>table>tbody>tr>td:nth-child(1) {
-    width: 10%;
 }
 
 .write-table>table>tbody>tr>td:nth-child(2) {
-    width: 50%;
     text-align: left;
 }
 
-.write-table>table>tbody>tr>td:nth-child(3) {
-    width: 10%;
-}
-
-.write-table>table>tbody>tr>td:nth-child(4) {
-    width: 10%;
-}
-
-.write-table>table>tbody>tr>td:nth-child(5) {
-    width: 10%;
-}
-
-.write-table>table>tbody>tr>td:nth-child(6) {
-    width: 10%;
-}
-
-.write-table>table>thead>tr>th {
-    padding: 0.6em;
-    vertical-align: middle;
-    position: relative;
-    border-right: 0.5px solid #ddd;
-    font-size: 14px;
-}
-
+.write-table>table>thead>tr>th,
 .write-table>table>tbody>tr>td {
     padding: 0.6em;
     vertical-align: middle;
@@ -1807,6 +1845,7 @@ th {
 .write-details-btn {
     width: 100%;
     display: flex;
+    
     gap: 4px;
     justify-content: flex-end;
     margin-bottom: 30px;
@@ -1827,11 +1866,28 @@ th {
     color: #969696;
 }
 
+#airport-list-modal .main_sls_form>button.input-submit {
+    display: block;
+    padding: 0px 8px;
+    align-self: flex-end;
+    background-color: #103972;
+    color: #fff;
+    font-weight: bold;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+}
+
+#airport-list-modal .main_sls_form>button.input-submit:focus {
+    box-shadow: 0px 0px 5px 1px #21396E;
+}
+
 
 /* ================================================
    반응형
    ================================================ */
 @media (max-width: 1024px) {
+
     /* header */
     .airep-form-box,
     .sub-text-input {
@@ -1864,9 +1920,17 @@ th {
     .modal-box {
         width: 90% !important;
     }
+
+    #airport-list-modal .main_sls_form>button.input-submit {
+        height: 40px;
+        line-height: 40px;
+        margin: 20px 0 0;
+        width: auto;
+    }
 }
 
 @media (max-width: 768px) {
+
     /* footer */
     .footer .footer-menu .footer-menulist {
         display: flex;

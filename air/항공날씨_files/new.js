@@ -2,28 +2,30 @@
 // 직항 / 경유 선택
 // ================================================
 function toggleStopover(radio) {
-    const stopoverBox = document.getElementById('stopover-box');
-    const middleMap = document.querySelector('.middle_map');
-    const middlePort = document.querySelector('.middle_port');
-    const modal_middleTab = document.querySelector('#meteogram-modal .modal-tab:nth-child(2)');
-    const modal_middleMap = document.querySelector('#meteogram-modal .tab-panel:nth-child(2)');
     const isStopover = radio.value === 'stopover';
 
-    if (isStopover) {
-        if (stopoverBox) stopoverBox.style.display = '';
-        if (middleMap) middleMap.style.display = '';
-        if (middlePort) middlePort.style.display = '';
-        if (modal_middleTab) modal_middleTab.style.display = '';
-        if (modal_middleMap) modal_middleMap.style.display = '';
-    } else {
-        if (stopoverBox) {
-            stopoverBox.style.display = 'none';
-            stopoverBox.querySelector('input').value = '';
-        }
-        if (middleMap) middleMap.style.display = 'none';
-        if (middlePort) middlePort.style.display = 'none';
-        if (modal_middleTab) modal_middleTab.style.display = 'none';
-        if (modal_middleMap) modal_middleMap.style.display = 'none';
+    const stopoverBox = document.getElementById('stopover-box');
+    const airportListStopoverBox = document.getElementById('airport-list-stopover-box');
+    const toggleTargets = [
+        stopoverBox,
+        airportListStopoverBox,
+        document.querySelector('.middle_map'),
+        document.querySelector('.middle_port'),
+        document.querySelector('#meteogram-modal .modal-tab:nth-child(2)'),
+        document.querySelector('#meteogram-modal .tab-panel:nth-child(2)')
+    ];
+
+    toggleTargets.forEach(function (el) {
+        if (el) el.style.display = isStopover ? '' : 'none';
+    });
+
+    if (!isStopover && stopoverBox) {
+        const stopoverInput = stopoverBox.querySelector('input');
+        if (stopoverInput) stopoverInput.value = '';
+    }
+    if (!isStopover && airportListStopoverBox) {
+        const stopoverInput = airportListStopoverBox.querySelector('input');
+        if (stopoverInput) stopoverInput.value = '';
     }
 
     syncAirportWeatherStopover(isStopover);
@@ -135,15 +137,40 @@ function initMapOpenToggle() {
 function getRouteInputs() {
     const routeForm = document.getElementById('route-search-form');
     if (!routeForm) return [];
-    return Array.from(routeForm.querySelectorAll('input[name="icao"]'));
+    return Array.from(routeForm.querySelectorAll('.sub-text-input input[name="icao"]'));
 }
 
 function getRouteValues() {
     const inputs = getRouteInputs();
     return {
-        start: (inputs[0]?.value || '').trim().toUpperCase(),
-        stopover: (inputs[1]?.value || '').trim().toUpperCase(),
-        arrive: (inputs[2]?.value || '').trim().toUpperCase()
+        start: getAirportInputIcao(inputs[0]),
+        stopover: getAirportInputIcao(inputs[1]),
+        arrive: getAirportInputIcao(inputs[2])
+    };
+}
+
+function getAirportFromInput(input) {
+    const icao = getAirportInputIcao(input);
+    if (!icao) return null;
+
+    const displayValue = (input?.value || '').trim();
+    const displayNameMatch = displayValue.match(/^(.+)\([A-Z0-9]{4}\)\s*$/i);
+    const displayName = displayNameMatch ? displayNameMatch[1].trim() : '';
+    const airport = findAirportByIcao(icao);
+
+    return {
+        icao,
+        name: input?.dataset.airportName || displayName || airport?.name || airport?.nameEng || '',
+        nameEng: input?.dataset.airportNameEng || airport?.nameEng || ''
+    };
+}
+
+function getRouteAirports() {
+    const inputs = getRouteInputs();
+    return {
+        start: getAirportFromInput(inputs[0]),
+        stopover: getAirportFromInput(inputs[1]),
+        arrive: getAirportFromInput(inputs[2])
     };
 }
 
@@ -190,8 +217,9 @@ function syncMetReport(port, icao) {
     }
 }
 
-function setRoutePortContent(selector, icao) {
+function setRoutePortContent(selector, airport) {
     const port = document.querySelector(selector);
+    const icao = airport?.icao || '';
     if (!port || !icao) return;
 
     const portCode = port.querySelector('.port-name span:first-child');
@@ -200,7 +228,10 @@ function setRoutePortContent(selector, icao) {
     const tafInfo = port.querySelector('.taf_info');
 
     if (portCode) portCode.textContent = icao;
-    if (portName) portName.textContent = '';
+    if (portName) {
+        portName.textContent = airport.name || '';
+        portName.title = airport.name || airport.nameEng || '';
+    }
     if (metarInfo) {
         metarInfo.innerHTML = `<p>METAR ${icao} 210730Z 22012KT 190V280 CAVOK 12/07 Q1017 NOSIG RMK ASIAN DUST(HWANGSA)=</p>`;
     }
@@ -219,7 +250,7 @@ function setRoutePortContent(selector, icao) {
 }
 
 function syncRouteMetarTafContent() {
-    const route = getRouteValues();
+    const route = getRouteAirports();
     setRoutePortContent('.start_port', route.start);
     setRoutePortContent('.middle_port', route.stopover);
     setRoutePortContent('.end_port', route.arrive);
@@ -251,7 +282,7 @@ function syncRouteSearchSubmit(event) {
     if (event) event.preventDefault();
 
     getRouteInputs().forEach(input => {
-        input.value = input.value.trim().toUpperCase();
+        normalizeAirportInputDisplay(input);
     });
 
     if (!hasRequiredRoute()) {
@@ -284,537 +315,843 @@ function initRouteQueryValues() {
     }
     inputs.forEach(input => {
         input.value = '';
+        clearAirportInputMeta(input);
     });
     routeSearchCommitted = false;
 }
 
 
 // ================================================
-// 공항 검색/선택 패널 (경로 입력용)
+// 공항 목록 검색 (amo.kma.go.kr main_sls_form 방식)
 // ================================================
-function initAirportListPanel() {
-    const routeForm = document.getElementById('route-search-form');
-    const panel = document.getElementById('route-airport-panel');
-    const wrapper = panel ? panel.querySelector('.main_sls_form') : null;
-    const openButton = document.querySelector('.route-airport-list-btn');
-    const closeButton = wrapper ? wrapper.querySelector('.route-airport-close-btn') : null;
-    const searchButton = wrapper ? wrapper.querySelector('button[name="search"]') : null;
-    const keywordInput = wrapper ? wrapper.querySelector('input[name="q"]') : null;
-    const keywordType = wrapper ? wrapper.querySelector('.chk_label[data-name="keyword-type"]') : null;
-    const selectType = wrapper ? wrapper.querySelector('.chk_label[data-name="select-type"]') : null;
-    const keywordBox = wrapper ? wrapper.querySelector('.airport-search-keyword') : null;
-    const selectBox = wrapper ? wrapper.querySelector('.airport-search-select') : null;
-    const resultBox = wrapper ? wrapper.querySelector('.airport-search-result') : null;
-    const countrySelect = wrapper ? wrapper.querySelector('select[name="country"]') : null;
-    const airportSelect = wrapper ? wrapper.querySelector('select[name="airport"]') : null;
+let airportListRouteIndex = 0;
 
-    if (!panel || !wrapper || !openButton) return;
+function getAirportData() {
+    const data = window.WORLD_AIRPORT_DATA || {};
+    return {
+        countries: Array.isArray(data.countries) ? data.countries : [],
+        airportsByCountry: data.airportsByCountry || {},
+        airports: Array.isArray(data.airports) ? data.airports : []
+    };
+}
 
-    const KEYWORD_TYPE = 'keyword-type';
-    const SELECT_TYPE = 'select-type';
-    const HISTORY_KEY = 'route-airport-search-history';
-    const API_BASE = 'https://amo.kma.go.kr/';
-    const FALLBACK_AIRPORTS = [
-        { icao: 'RKSI', airportKor: '인천국제공항', airportEng: 'Incheon International Airport', cityKor: '인천', cityEng: 'Incheon', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'RKSS', airportKor: '김포국제공항', airportEng: 'Gimpo International Airport', cityKor: '서울', cityEng: 'Seoul', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'RKPC', airportKor: '제주국제공항', airportEng: 'Jeju International Airport', cityKor: '제주', cityEng: 'Jeju', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'RKPK', airportKor: '김해국제공항', airportEng: 'Gimhae International Airport', cityKor: '부산', cityEng: 'Busan', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'RKTN', airportKor: '대구국제공항', airportEng: 'Daegu International Airport', cityKor: '대구', cityEng: 'Daegu', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'RKTU', airportKor: '청주국제공항', airportEng: 'Cheongju International Airport', cityKor: '청주', cityEng: 'Cheongju', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'RKJJ', airportKor: '광주공항', airportEng: 'Gwangju Airport', cityKor: '광주', cityEng: 'Gwangju', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'RKTH', airportKor: '포항경주공항', airportEng: 'Pohang Gyeongju Airport', cityKor: '포항', cityEng: 'Pohang', countryKor: '대한민국', countryEng: 'Republic of Korea' },
-        { icao: 'KJFK', airportKor: '뉴욕 존 F. 케네디', airportEng: 'John F. Kennedy International Airport', cityKor: '뉴욕', cityEng: 'New York', countryKor: '미국', countryEng: 'United States' },
-        { icao: 'KLAX', airportKor: '로스앤젤레스', airportEng: 'Los Angeles International Airport', cityKor: '로스앤젤레스', cityEng: 'Los Angeles', countryKor: '미국', countryEng: 'United States' },
-        { icao: 'KORD', airportKor: '시카고 오헤어', airportEng: "Chicago O'Hare International Airport", cityKor: '시카고', cityEng: 'Chicago', countryKor: '미국', countryEng: 'United States' },
-        { icao: 'RJTT', airportKor: '도쿄 하네다', airportEng: 'Tokyo Haneda Airport', cityKor: '도쿄', cityEng: 'Tokyo', countryKor: '일본', countryEng: 'Japan' },
-        { icao: 'RJAA', airportKor: '도쿄 나리타', airportEng: 'Narita International Airport', cityKor: '도쿄', cityEng: 'Tokyo', countryKor: '일본', countryEng: 'Japan' },
-        { icao: 'ZBAA', airportKor: '베이징 수도', airportEng: 'Beijing Capital International Airport', cityKor: '베이징', cityEng: 'Beijing', countryKor: '중국', countryEng: 'China' },
-        { icao: 'ZSPD', airportKor: '상하이 푸동', airportEng: 'Shanghai Pudong International Airport', cityKor: '상하이', cityEng: 'Shanghai', countryKor: '중국', countryEng: 'China' },
-        { icao: 'UUEE', airportKor: '모스크바 셰레메티예보', airportEng: 'Sheremetyevo International Airport', cityKor: '모스크바', cityEng: 'Moscow', countryKor: '러시아', countryEng: 'Russia' }
-    ];
+function normalizeAirportText(value) {
+    return (value || '').toString().trim().toUpperCase();
+}
 
-    let currentType = KEYWORD_TYPE;
-    let selectedAirport = null;
-    let searchTimer = null;
-    let lastQuery = '';
-    let currentPage = 1;
-
-    function openPanel() {
-        panel.classList.add('is-open');
-        panel.setAttribute('aria-hidden', 'false');
-        setType(KEYWORD_TYPE);
-    }
-
-    function closePanel() {
-        panel.classList.remove('is-open');
-        panel.setAttribute('aria-hidden', 'true');
-        if (resultBox) resultBox.style.display = 'none';
-    }
-
-    function isVisibleRouteInput(input) {
-        if (!input) return false;
-        const rect = input.getBoundingClientRect();
-        const style = window.getComputedStyle(input);
-        return rect.width > 0
-            && rect.height > 0
-            && style.display !== 'none'
-            && style.visibility !== 'hidden';
-    }
-
-    function focusWithoutScroll(element) {
-        if (!element) return;
-        try {
-            element.focus({ preventScroll: true });
-        } catch (error) {
-            element.focus();
-        }
-    }
-
-    function getVisibleRouteInputs() {
-        return getRouteInputs().filter(isVisibleRouteInput);
-    }
-
-    function getTargetRouteInput() {
-        const inputs = getRouteInputs();
-        const activeInput = document.activeElement && document.activeElement.matches('#route-search-form input[name="icao"]')
-            ? document.activeElement
-            : null;
-
-        if (activeInput) return activeInput;
-        if (inputs.includes(lastFocusedRouteInput) && isVisibleRouteInput(lastFocusedRouteInput)) {
-            return lastFocusedRouteInput;
-        }
-
-        return inputs.find(input => isVisibleRouteInput(input) && !input.value.trim())
-            || inputs.find(isVisibleRouteInput)
-            || inputs[0];
-    }
-
-    function getNextRouteInput(currentInput) {
-        const inputs = getVisibleRouteInputs();
-        const currentIndex = inputs.indexOf(currentInput);
-
-        if (currentIndex === -1) return inputs.find(input => !input.value.trim()) || null;
-
-        return inputs.slice(currentIndex + 1).find(input => !input.value.trim())
-            || inputs[currentIndex + 1]
-            || null;
-    }
-
-    function fillFocusedOrFirstInput(icao) {
-        const targetInput = getTargetRouteInput();
-
-        if (targetInput && icao) {
-            targetInput.value = icao.toUpperCase();
-            targetInput.dispatchEvent(new Event('input', { bubbles: true }));
-            focusWithoutScroll(targetInput);
-            lastFocusedRouteInput = targetInput;
-        }
-
-        return targetInput;
-    }
-
-    function resetKeywordSearch() {
-        if (keywordInput) keywordInput.value = '';
-        if (resultBox) {
-            resultBox.innerHTML = '';
-            resultBox.style.display = 'none';
-        }
-        selectedAirport = null;
-        lastQuery = '';
-    }
-
-    function prepareNextAirportInput(nextInput) {
-        if (!nextInput) {
-            closePanel();
-            return;
-        }
-
-        lastFocusedRouteInput = nextInput;
-        focusWithoutScroll(nextInput);
-
-        if (currentType === KEYWORD_TYPE) {
-            resetKeywordSearch();
-            window.setTimeout(() => {
-                if (panel.classList.contains('is-open') && keywordInput) {
-                    focusWithoutScroll(keywordInput);
-                }
-            }, 0);
-        } else if (airportSelect) {
-            airportSelect.value = '';
-        }
-    }
-
-    function commitAirportSelection(airport) {
-        const normalizedAirport = normalizeAirport(airport || selectedAirport || {});
-        if (!normalizedAirport.icao) return false;
-
-        selectedAirport = normalizedAirport;
-        saveHistory(normalizedAirport);
-
-        const filledInput = fillFocusedOrFirstInput(normalizedAirport.icao);
-        const nextInput = getNextRouteInput(filledInput);
-        prepareNextAirportInput(nextInput);
-
-        return true;
-    }
-
-    function normalizeAirport(item) {
+function escapeAirportText(value) {
+    return (value || '').toString().replace(/[&<>"']/g, function (char) {
         return {
-            icao: item.icao,
-            name: item.airportKor || item.name || item.icao,
-            nameEng: item.airportEng || item.nameEng || item.icao,
-            cityKor: item.cityKor || '',
-            cityEng: item.cityEng || '',
-            countryKor: item.countryKor || item.country || '',
-            countryEng: item.countryEng || ''
-        };
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#39;'
+        }[char];
+    });
+}
+
+function extractAirportIcao(value) {
+    const normalized = normalizeAirportText(value);
+    if (!normalized) return '';
+
+    const parenMatch = normalized.match(/\(([A-Z0-9]{4})\)\s*$/);
+    if (parenMatch) return parenMatch[1];
+
+    if (/^[A-Z0-9]{4}$/.test(normalized)) return normalized;
+
+    const codeMatch = normalized.match(/\b([A-Z][A-Z0-9]{3})\b/);
+    return codeMatch ? codeMatch[1] : '';
+}
+
+function findAirportByIcao(icao) {
+    const normalizedIcao = normalizeAirportText(icao);
+    if (!normalizedIcao) return null;
+
+    return getAirportData().airports.find(function (airport) {
+        return normalizeAirportText(airport.icao) === normalizedIcao;
+    }) || null;
+}
+
+function formatAirportDisplayText(airport) {
+    if (!airport || !airport.icao) return '';
+
+    const icao = normalizeAirportText(airport.icao);
+    const name = (airport.name || airport.nameEng || '').toString().trim();
+    return name ? `${name}(${icao})` : icao;
+}
+
+function setAirportInputValue(input, airport) {
+    if (!input || !airport || !airport.icao) return;
+
+    const displayText = formatAirportDisplayText(airport);
+    input.value = displayText;
+    input.title = displayText;
+    input.dataset.icao = normalizeAirportText(airport.icao);
+    input.dataset.airportName = airport.name || '';
+    input.dataset.airportNameEng = airport.nameEng || '';
+}
+
+function clearAirportInputMeta(input) {
+    if (!input) return;
+
+    delete input.dataset.icao;
+    delete input.dataset.airportName;
+    delete input.dataset.airportNameEng;
+    input.removeAttribute('title');
+}
+
+function getAirportInputIcao(input) {
+    if (!input) return '';
+
+    const datasetIcao = normalizeAirportText(input.dataset.icao);
+    if (datasetIcao) return datasetIcao;
+
+    return extractAirportIcao(input.value);
+}
+
+function normalizeAirportInputDisplay(input) {
+    if (!input) return;
+
+    const icao = getAirportInputIcao(input);
+    if (!icao) {
+        input.value = input.value.trim();
+        clearAirportInputMeta(input);
+        return;
     }
 
-    function readHistory() {
-        try {
-            return JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
-        } catch (error) {
-            return [];
-        }
+    const airport = findAirportByIcao(icao);
+    if (airport) {
+        setAirportInputValue(input, airport);
+        return;
     }
 
-    function saveHistory(airport) {
-        if (!airport || !airport.icao) return;
-        const history = readHistory().filter(item => item.icao !== airport.icao);
-        history.unshift(airport);
-        localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(0, 3)));
-        renderAirportHistory();
+    input.value = icao;
+    input.dataset.icao = icao;
+}
+
+function copyAirportInputValue(source, target) {
+    if (!source || !target) return;
+
+    target.value = source.value || '';
+    if (source.title) target.title = source.title;
+    else target.removeAttribute('title');
+
+    if (source.dataset.icao) target.dataset.icao = source.dataset.icao;
+    else delete target.dataset.icao;
+
+    if (source.dataset.airportName) target.dataset.airportName = source.dataset.airportName;
+    else delete target.dataset.airportName;
+
+    if (source.dataset.airportNameEng) target.dataset.airportNameEng = source.dataset.airportNameEng;
+    else delete target.dataset.airportNameEng;
+}
+
+function getAirportListModalInputs() {
+    const modal = document.getElementById('airport-list-modal');
+    return modal ? Array.from(modal.querySelectorAll('.modal-tabs input[name="icao"]')) : [];
+}
+
+function setAirportListRouteIndex(index) {
+    const routeInputs = getRouteInputs();
+    const maxIndex = routeInputs.length - 1;
+    airportListRouteIndex = Math.max(0, Math.min(Number(index) || 0, maxIndex));
+
+    const modal = document.getElementById('airport-list-modal');
+    if (!modal) return;
+
+    syncAirportListModalInputs();
+}
+
+function getNextAirportListRouteIndex(index) {
+    const routeOrder = isStopoverRoute() ? [0, 1, 2] : [0, 2];
+    const currentOrderIndex = routeOrder.indexOf(Number(index));
+
+    if (currentOrderIndex === -1) {
+        return routeOrder[0];
     }
 
-    function renderAirportHistory() {
-        const history = readHistory();
-        wrapper.querySelectorAll('.airport-query-history').forEach(historyBox => {
-            historyBox.innerHTML = '';
+    return routeOrder[Math.min(currentOrderIndex + 1, routeOrder.length - 1)];
+}
 
-            if (history.length === 0) {
-                const fallback = normalizeAirport(FALLBACK_AIRPORTS[0]);
-                historyBox.appendChild(createHistoryLink(fallback));
-                return;
-            }
+function focusAirportListRouteInput(index) {
+    const targetInput = getAirportListModalInputs().find(function (input) {
+        return Number(input.dataset.routeIndex) === Number(index);
+    });
 
-            history.forEach((item, index) => {
-                historyBox.appendChild(createHistoryLink(item));
-                if (index < history.length - 1) historyBox.append(', ');
-            });
+    if (targetInput) {
+        targetInput.focus();
+    }
+}
+
+function syncAirportListModalInputs() {
+    const routeInputs = getRouteInputs();
+    getAirportListModalInputs().forEach(function (input) {
+        const index = Number(input.dataset.routeIndex);
+        copyAirportInputValue(routeInputs[index], input);
+    });
+}
+
+function applyAirportToRoute(airport) {
+    if (!airport || !airport.icao) return false;
+
+    const routeInputs = getRouteInputs();
+    const modalInputs = getAirportListModalInputs();
+    const target = routeInputs[airportListRouteIndex];
+    const modalTarget = modalInputs.find(function (input) {
+        return Number(input.dataset.routeIndex) === airportListRouteIndex;
+    });
+
+    if (!target) return false;
+
+    setAirportInputValue(target, airport);
+    if (modalTarget) setAirportInputValue(modalTarget, airport);
+    lastFocusedRouteInput = target;
+    syncRouteViewState();
+    setAirportListRouteIndex(getNextAirportListRouteIndex(airportListRouteIndex));
+    focusAirportListRouteInput(airportListRouteIndex);
+    return true;
+}
+
+function readAirportHistory() {
+    try {
+        return JSON.parse(localStorage.getItem('search-history') || '[]').filter(function (item) {
+            return item && item.icao && item.icao !== 'RKJK';
         });
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveAirportHistory(airport) {
+    if (!airport || !airport.icao || !airport.name || !airport.nameEng) return;
+
+    const history = readAirportHistory().filter(function (item) {
+        return item.icao !== airport.icao;
+    });
+    history.unshift({
+        icao: airport.icao,
+        name: airport.name,
+        nameEng: airport.nameEng
+    });
+    localStorage.setItem('search-history', JSON.stringify(history.slice(0, 3)));
+}
+
+function renderAirportHistory(wrapper) {
+    const holder = wrapper.querySelector('.airport-query-history');
+    if (!holder) return;
+
+    const history = readAirportHistory();
+    holder.innerHTML = '';
+
+    if (history.length === 0) {
+        holder.textContent = '없음.';
+        return;
     }
 
-    function createHistoryLink(airport) {
+    history.forEach(function (airport, index) {
         const link = document.createElement('a');
         link.href = '#';
         link.dataset.icao = airport.icao;
-        link.dataset.name = airport.name || airport.icao;
-        link.dataset.nameEng = airport.nameEng || airport.icao;
-        link.textContent = `${airport.name || airport.icao}(${airport.icao})`;
-        return link;
+        link.dataset.name = airport.name;
+        link.dataset.nameEng = airport.nameEng;
+        link.textContent = `${airport.name}(${airport.icao})`;
+        holder.appendChild(link);
+        if (index < history.length - 1) holder.append(', ');
+    });
+}
+
+function findAirports(query) {
+    const data = getAirportData();
+    const normalizedQuery = normalizeAirportText(query);
+
+    if (!normalizedQuery) return [];
+
+    return data.airports.filter(function (airport) {
+        return [
+            airport.icao,
+            airport.name,
+            airport.nameEng,
+            airport.country,
+            airport.countryEng
+        ].some(function (value) {
+            return normalizeAirportText(value).includes(normalizedQuery);
+        });
+    });
+}
+
+function getOrCreateRouteAirportSuggestList(input) {
+    const box = input.closest('.airportweather-world-search');
+    if (!box) return null;
+
+    let list = box.querySelector('.route-airport-suggest-list');
+    if (!list) {
+        list = document.createElement('ul');
+        list.className = 'route-airport-suggest-list';
+        box.appendChild(list);
     }
+    return list;
+}
+
+function hideRouteAirportSuggestList(input) {
+    const list = input ? input.closest('.airportweather-world-search')?.querySelector('.route-airport-suggest-list') : null;
+    if (list) {
+        list.innerHTML = '';
+        list.style.display = 'none';
+    }
+}
+
+function getRouteAirportSuggestionItems(input) {
+    const list = input ? input.closest('.airportweather-world-search')?.querySelector('.route-airport-suggest-list') : null;
+    if (!list || list.style.display === 'none') return [];
+
+    return Array.from(list.querySelectorAll('a.route-airport-suggest-item'));
+}
+
+function setRouteAirportSuggestionActiveIndex(input, index) {
+    const items = getRouteAirportSuggestionItems(input);
+    if (items.length === 0) return -1;
+
+    const nextIndex = ((index % items.length) + items.length) % items.length;
+    items.forEach(function (item, itemIndex) {
+        const isActive = itemIndex === nextIndex;
+        item.classList.toggle('is-keyboard-active', isActive);
+        item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        if (isActive) item.scrollIntoView({ block: 'nearest' });
+    });
+
+    return nextIndex;
+}
+
+function clearRouteAirportSuggestionActive(input) {
+    getRouteAirportSuggestionItems(input).forEach(function (item) {
+        item.classList.remove('is-keyboard-active');
+        item.setAttribute('aria-selected', 'false');
+    });
+}
+
+function selectRouteAirportSuggestion(input, airport) {
+    if (!input || !airport) return;
+
+    setAirportInputValue(input, airport);
+    lastFocusedRouteInput = input;
+    routeSearchCommitted = false;
+    syncRouteViewState();
+    hideRouteAirportSuggestList(input);
+    input.focus();
+}
+
+function renderRouteAirportSuggestions(input) {
+    const list = getOrCreateRouteAirportSuggestList(input);
+    if (!list) return;
+
+    const query = input.value.trim();
+    const results = findAirports(query).slice(0, 8);
+    list.innerHTML = '';
+
+    if (!query || results.length === 0) {
+        list.style.display = 'none';
+        return;
+    }
+
+    results.forEach(function (airport) {
+        const item = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = '#';
+        link.className = 'route-airport-suggest-item';
+        link.dataset.icao = airport.icao;
+        link.dataset.name = airport.name;
+        link.dataset.nameEng = airport.nameEng;
+        link.textContent = `${airport.name}(${airport.icao}) - ${airport.country}`;
+        link.addEventListener('mousedown', function (event) {
+            event.preventDefault();
+        });
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+            selectRouteAirportSuggestion(input, airport);
+        });
+        item.appendChild(link);
+        list.appendChild(item);
+    });
+
+    list.style.display = 'block';
+}
+
+function initRouteInputAutocomplete() {
+    getRouteInputs().forEach(function (input) {
+        let activeSuggestionIndex = -1;
+        input.setAttribute('autocomplete', 'off');
+
+        input.addEventListener('input', function () {
+            clearAirportInputMeta(input);
+            activeSuggestionIndex = -1;
+            routeSearchCommitted = false;
+            syncRouteViewState();
+            renderRouteAirportSuggestions(input);
+        });
+
+        input.addEventListener('focus', function () {
+            lastFocusedRouteInput = input;
+            if (input.value.trim()) renderRouteAirportSuggestions(input);
+        });
+
+        input.addEventListener('keydown', function (event) {
+            const suggestionItems = getRouteAirportSuggestionItems(input);
+
+            if (event.key === 'ArrowDown' && suggestionItems.length > 0) {
+                event.preventDefault();
+                activeSuggestionIndex = setRouteAirportSuggestionActiveIndex(input, activeSuggestionIndex + 1);
+                return;
+            }
+
+            if (event.key === 'ArrowUp' && suggestionItems.length > 0) {
+                event.preventDefault();
+                activeSuggestionIndex = setRouteAirportSuggestionActiveIndex(input, activeSuggestionIndex - 1);
+                return;
+            }
+
+            if (event.key === 'Enter' && suggestionItems.length > 0) {
+                event.preventDefault();
+                const activeItem = suggestionItems[activeSuggestionIndex >= 0 ? activeSuggestionIndex : 0];
+                selectRouteAirportSuggestion(input, {
+                    icao: activeItem.dataset.icao,
+                    name: activeItem.dataset.name,
+                    nameEng: activeItem.dataset.nameEng
+                });
+                activeSuggestionIndex = -1;
+                return;
+            }
+
+            if (event.key === 'Escape') {
+                hideRouteAirportSuggestList(input);
+                activeSuggestionIndex = -1;
+                clearRouteAirportSuggestionActive(input);
+            }
+        });
+    });
+
+    document.addEventListener('click', function (event) {
+        if (event.target.closest('.route-airport-suggest-list')) return;
+        getRouteInputs().forEach(hideRouteAirportSuggestList);
+    });
+}
+
+function selectAirportItemFromModal(link, event) {
+    if (!link) return false;
+    if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.stopImmediatePropagation) event.stopImmediatePropagation();
+    }
+
+    const wrapper = link.closest('.main_sls_form');
+    const resultHolder = link.closest('.airport-search-result');
+    const queryInput = wrapper?.querySelector('input[name="q"]');
+    const airport = {
+        icao: link.dataset.icao,
+        name: link.dataset.name,
+        nameEng: link.dataset.nameEng
+    };
+
+    saveAirportHistory(airport);
+    if (wrapper) renderAirportHistory(wrapper);
+    applyAirportToRoute(airport);
+    if (resultHolder) resultHolder.style.display = 'none';
+    if (queryInput) {
+        queryInput.value = '';
+        queryInput.focus();
+    }
+    return false;
+}
+
+window.selectAirportItemFromModal = selectAirportItemFromModal;
+
+function renderAirportResults(wrapper, query, page) {
+    const resultHolder = wrapper.querySelector('.airport-search-result');
+    if (!resultHolder) return null;
+
+    const pageSize = 40;
+    const results = findAirports(query);
+    const visibleResults = results.slice(0, page * pageSize);
+
+    resultHolder.innerHTML = '';
+
+    if (visibleResults.length === 0) {
+        resultHolder.innerHTML = '<li><span class="no-airports">해당하는 공항을 찾을 수 없습니다.</span></li>';
+        resultHolder.style.display = 'block';
+        return null;
+    }
+
+    visibleResults.forEach(function (airport) {
+        const label = `${airport.name}(${airport.icao}) - ${airport.country}`;
+        resultHolder.insertAdjacentHTML('beforeend', `
+            <li>
+                <a href="#" title="공항선택" class="airport-item"
+                    onclick="return selectAirportItemFromModal(this, event);"
+                    data-icao="${escapeAirportText(airport.icao)}"
+                    data-name="${escapeAirportText(airport.name)}"
+                    data-name-eng="${escapeAirportText(airport.nameEng)}">
+                    ${escapeAirportText(label)}
+                </a>
+            </li>
+        `);
+    });
+
+    resultHolder.querySelectorAll('a.airport-item').forEach(function (link) {
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            event.stopPropagation();
+
+            const airport = {
+                icao: link.dataset.icao,
+                name: link.dataset.name,
+                nameEng: link.dataset.nameEng
+            };
+            const queryInput = wrapper.querySelector('input[name="q"]');
+
+            saveAirportHistory(airport);
+            renderAirportHistory(wrapper);
+            applyAirportToRoute(airport);
+            resultHolder.style.display = 'none';
+            if (queryInput) {
+                queryInput.value = '';
+                queryInput.focus();
+            }
+        });
+    });
+
+    resultHolder.style.display = 'block';
+    return results.length === 1 ? results[0] : null;
+}
+
+function getAirportResultItems(wrapper) {
+    const resultHolder = wrapper?.querySelector('.airport-search-result');
+    if (!resultHolder || resultHolder.style.display === 'none') return [];
+
+    return Array.from(resultHolder.querySelectorAll('a.airport-item'));
+}
+
+function setAirportResultActiveIndex(wrapper, index) {
+    const items = getAirportResultItems(wrapper);
+    if (items.length === 0) return -1;
+
+    const nextIndex = ((index % items.length) + items.length) % items.length;
+    items.forEach(function (item, itemIndex) {
+        const isActive = itemIndex === nextIndex;
+        item.classList.toggle('is-keyboard-active', isActive);
+        item.setAttribute('aria-selected', isActive ? 'true' : 'false');
+        if (isActive) item.scrollIntoView({ block: 'nearest' });
+    });
+
+    return nextIndex;
+}
+
+function clearAirportResultActive(wrapper) {
+    getAirportResultItems(wrapper).forEach(function (item) {
+        item.classList.remove('is-keyboard-active');
+        item.setAttribute('aria-selected', 'false');
+    });
+}
+
+function populateAirportSelects(wrapper) {
+    const data = getAirportData();
+    const countrySelect = wrapper.querySelector('select[name="country"]');
+    const airportSelect = wrapper.querySelector('select[name="airport"]');
+    if (!countrySelect || !airportSelect || countrySelect.dataset.loaded === 'true') return;
+
+    countrySelect.innerHTML = '';
+    data.countries.forEach(function (country) {
+        const option = document.createElement('option');
+        option.value = country.value;
+        option.dataset.name = country.name;
+        option.dataset.nameEng = country.nameEng;
+        option.textContent = country.name;
+        if (country.value === '대한민국') option.selected = true;
+        countrySelect.appendChild(option);
+    });
+    countrySelect.dataset.loaded = 'true';
+    populateAirportOptions(wrapper);
+}
+
+function populateAirportOptions(wrapper) {
+    const data = getAirportData();
+    const countrySelect = wrapper.querySelector('select[name="country"]');
+    const airportSelect = wrapper.querySelector('select[name="airport"]');
+    if (!countrySelect || !airportSelect) return;
+
+    const airports = data.airportsByCountry[countrySelect.value] || [];
+    airportSelect.innerHTML = '';
+
+    airports.forEach(function (airport) {
+        const option = document.createElement('option');
+        option.value = airport.icao;
+        option.dataset.name = airport.name;
+        option.dataset.nameEng = airport.nameEng;
+        option.textContent = airport.name;
+        if (airport.icao === 'RKSI') option.selected = true;
+        airportSelect.appendChild(option);
+    });
+}
+
+function readSelectedAirportFromSelect(wrapper) {
+    const airportSelect = wrapper.querySelector('select[name="airport"]');
+    if (!airportSelect || !airportSelect.value) return null;
+
+    const option = airportSelect.options[airportSelect.selectedIndex];
+    return {
+        icao: airportSelect.value,
+        name: option?.dataset.name || option?.textContent || airportSelect.value,
+        nameEng: option?.dataset.nameEng || option?.textContent || airportSelect.value
+    };
+}
+
+function initAirportSearchForm(wrapper) {
+    const keywordType = wrapper.querySelector('a.chk_label[data-name="keyword-type"]');
+    const selectType = wrapper.querySelector('a.chk_label[data-name="select-type"]');
+    const keywordBox = wrapper.querySelector('.airport-search-keyword');
+    const selectBox = wrapper.querySelector('.airport-search-select');
+    const queryInput = wrapper.querySelector('input[name="q"]');
+    const searchButton = wrapper.querySelector('button[name="search"], button.input-submit[type="submit"], button.input-submit');
+    const resultHolder = wrapper.querySelector('.airport-search-result');
+    let currentType = 'keyword-type';
+    let selectedAirport = null;
+    let currentPage = 1;
+    let lastQuery = '';
+    let searchTimer = null;
+    let activeResultIndex = -1;
 
     function setType(type) {
         currentType = type;
-        const isKeyword = type === KEYWORD_TYPE;
-
-        if (keywordType) {
-            keywordType.classList.toggle('active', isKeyword);
-            keywordType.dataset.checked = String(isKeyword);
-            keywordType.title = isKeyword ? '선택됨' : '';
+        keywordType?.classList.toggle('active', type === 'keyword-type');
+        selectType?.classList.toggle('active', type === 'select-type');
+        keywordType?.setAttribute('data-checked', type === 'keyword-type' ? 'true' : 'false');
+        selectType?.setAttribute('data-checked', type === 'select-type' ? 'true' : 'false');
+        keywordType?.setAttribute('title', type === 'keyword-type' ? '선택됨' : '');
+        selectType?.setAttribute('title', type === 'select-type' ? '선택됨' : '');
+        if (keywordBox) keywordBox.style.display = type === 'keyword-type' ? '' : 'none';
+        if (selectBox) selectBox.style.display = type === 'select-type' ? '' : 'none';
+        if (type === 'select-type') {
+            populateAirportSelects(wrapper);
+            selectedAirport = readSelectedAirportFromSelect(wrapper);
         }
-        if (selectType) {
-            selectType.classList.toggle('active', !isKeyword);
-            selectType.dataset.checked = String(!isKeyword);
-            selectType.title = !isKeyword ? '선택됨' : '';
+    }
+
+    function runSearch(page) {
+        const query = queryInput?.value || '';
+        if (!query.trim()) {
+            if (resultHolder) {
+                resultHolder.innerHTML = '';
+                resultHolder.style.display = 'none';
+            }
+            selectedAirport = null;
+            activeResultIndex = -1;
+            return;
         }
-        if (keywordBox) keywordBox.style.display = isKeyword ? '' : 'none';
-        if (selectBox) selectBox.style.display = isKeyword ? 'none' : '';
-        if (resultBox) resultBox.style.display = 'none';
-        if (!isKeyword) initSelectUI();
-    }
-
-    function handleTypeClick(event) {
-        const typeButton = event.currentTarget && event.currentTarget.matches('.chk_label[data-name]')
-            ? event.currentTarget
-            : event.target.closest('.chk_label[data-name]');
-
-        if (!typeButton || !wrapper.contains(typeButton)) return;
-
-        event.preventDefault();
-        event.stopPropagation();
-        setType(typeButton.dataset.name);
-    }
-
-    async function fetchAirportSearch(query, page) {
-        const url = `${API_BASE}rest/world-airport/search.do?q=${encodeURIComponent(query)}&page=${page}`;
-        const response = await fetch(url);
-        if (!response.ok) throw new Error('airport search failed');
-        return response.json();
-    }
-
-    function localAirportSearch(query) {
-        const q = query.trim().toUpperCase();
-        return FALLBACK_AIRPORTS.filter(item => {
-            return item.icao.includes(q)
-                || item.airportKor.includes(query)
-                || item.airportEng.toUpperCase().includes(q)
-                || item.cityKor.includes(query)
-                || item.countryKor.includes(query)
-                || item.countryEng.toUpperCase().includes(q);
-        });
-    }
-
-    async function searchAirport(query, page = 1) {
-        if (!query || !resultBox) return [];
+        currentPage = page || 1;
         lastQuery = query;
-        currentPage = page;
-
-        let result = [];
-        try {
-            result = await fetchAirportSearch(query, page);
-        } catch (error) {
-            result = localAirportSearch(query);
-        }
-        return renderAirportResult(result);
+        selectedAirport = renderAirportResults(wrapper, query, currentPage);
+        activeResultIndex = -1;
+        clearAirportResultActive(wrapper);
     }
 
-    function renderAirportResult(result) {
-        if (!resultBox) return [];
-
-        resultBox.innerHTML = '';
-        const airports = result.map(normalizeAirport).filter(item => item.icao);
-
-        airports.slice(0, 20).forEach(airport => {
-            const item = document.createElement('li');
-            const link = document.createElement('a');
-            link.href = '#';
-            link.className = 'airport-item';
-            link.title = '공항선택';
-            link.dataset.icao = airport.icao;
-            link.dataset.name = airport.name;
-            link.dataset.nameEng = airport.nameEng;
-            link.textContent = `${airport.name}(${airport.icao}) - ${airport.cityKor},${airport.countryKor}`;
-            item.appendChild(link);
-            resultBox.appendChild(item);
-        });
-
-        if (airports.length === 0) {
-            const item = document.createElement('li');
-            const empty = document.createElement('span');
-            empty.className = 'no-airports';
-            empty.textContent = '해당하는 공항을 찾을 수 없습니다.';
-            item.appendChild(empty);
-            resultBox.appendChild(item);
-            selectedAirport = null;
-        } else if (airports.length === 1) {
-            selectedAirport = airports[0];
-        } else {
-            selectedAirport = null;
-        }
-
-        resultBox.style.display = 'block';
-        return airports;
-    }
-
-    function startQueryDelayed(delay) {
+    function delayedSearch() {
         if (searchTimer) window.clearTimeout(searchTimer);
-        searchTimer = window.setTimeout(() => {
-            const query = keywordInput ? keywordInput.value.trim() : '';
-            searchAirport(query, 1);
+        searchTimer = window.setTimeout(function () {
+            runSearch(1);
             searchTimer = null;
-        }, delay);
+        }, 500);
     }
 
-    function readSelectedAirport() {
-        if (currentType === SELECT_TYPE && airportSelect) {
-            const selectedOption = airportSelect.options[airportSelect.selectedIndex];
-            selectedAirport = selectedOption && selectedOption.value
-                ? {
-                    icao: selectedOption.value,
-                    name: selectedOption.dataset.name || selectedOption.textContent,
-                    nameEng: selectedOption.dataset.nameEng || selectedOption.textContent
-                }
-                : null;
-        } else if (!selectedAirport && keywordInput) {
-            const query = keywordInput.value.trim().toUpperCase();
-            const exactMatch = localAirportSearch(query).find(item => item.icao === query);
-            if (exactMatch) selectedAirport = normalizeAirport(exactMatch);
+    [keywordType, selectType].forEach(function (link) {
+        if (!link) return;
+        link.addEventListener('click', function (event) {
+            event.preventDefault();
+            setType(link.dataset.name);
+        });
+    });
+
+    queryInput?.addEventListener('keydown', function (event) {
+        const resultItems = getAirportResultItems(wrapper);
+
+        if (event.key === 'ArrowDown' && resultItems.length > 0) {
+            event.preventDefault();
+            activeResultIndex = setAirportResultActiveIndex(wrapper, activeResultIndex + 1);
+            return;
         }
-    }
 
-    function renderSelectOptions(airports) {
-        if (!countrySelect || !airportSelect) return;
-
-        const countries = Array.from(new Set(airports.map(item => item.countryKor).filter(Boolean))).sort();
-        countrySelect.innerHTML = countries.map(country => `<option value="${country}">${country}</option>`).join('');
-        if (countries.includes('대한민국')) countrySelect.value = '대한민국';
-
-        renderAirportOptions(airports);
-    }
-
-    function renderAirportOptions(airports) {
-        if (!countrySelect || !airportSelect) return;
-        const country = countrySelect.value;
-        const filtered = airports.filter(item => item.countryKor === country);
-
-        airportSelect.innerHTML = '<option value="">선택</option>' + filtered.map(item => {
-            return `<option value="${item.icao}" data-name="${item.airportKor}" data-name-eng="${item.airportEng}">${item.airportKor}</option>`;
-        }).join('');
-    }
-
-    async function initSelectUI() {
-        renderSelectOptions(FALLBACK_AIRPORTS);
-        try {
-            const response = await fetch(`${API_BASE}rest/world-airport/selects.do?country=${encodeURIComponent('대한민국')}`);
-            if (!response.ok) return;
-            const data = await response.json();
-            if (!Array.isArray(data) || !Array.isArray(data[0])) return;
-
-            if (countrySelect) {
-                countrySelect.innerHTML = data[0].map(option => {
-                    return `<option value="${option[1]}" data-name="${option[0]}" data-name-eng="${option[2]}">${option[0]}</option>`;
-                }).join('');
-                countrySelect.value = '대한민국';
-            }
-            if (airportSelect && Array.isArray(data[1])) {
-                airportSelect.innerHTML = '<option value="">선택</option>' + data[1].filter(option => option[1] !== 'RKJK').map(option => {
-                    return `<option value="${option[1]}" data-name="${option[0]}" data-name-eng="${option[2]}">${option[0]}</option>`;
-                }).join('');
-            }
-        } catch (error) {
-            renderSelectOptions(FALLBACK_AIRPORTS);
+        if (event.key === 'ArrowUp' && resultItems.length > 0) {
+            event.preventDefault();
+            activeResultIndex = setAirportResultActiveIndex(wrapper, activeResultIndex - 1);
+            return;
         }
-    }
 
-    openButton.addEventListener('click', event => {
-        event.preventDefault();
-        if (panel.classList.contains('is-open')) {
-            closePanel();
-        } else {
-            openPanel();
+        if (event.key === 'Enter' && resultItems.length > 0) {
+            event.preventDefault();
+            const activeItem = resultItems[activeResultIndex >= 0 ? activeResultIndex : 0];
+            selectAirportItemFromModal(activeItem, event);
+            activeResultIndex = -1;
+            return;
+        }
+
+        if (event.key === 'Escape') {
+            if (resultHolder) resultHolder.style.display = 'none';
+            activeResultIndex = -1;
+            clearAirportResultActive(wrapper);
         }
     });
 
-    if (closeButton) {
-        closeButton.addEventListener('click', event => {
-            event.preventDefault();
-            closePanel();
-            openButton.focus();
-        });
-    }
+    queryInput?.addEventListener('keyup', function (event) {
+        if (['ArrowDown', 'ArrowUp', 'Enter', 'Escape'].includes(event.key)) return;
+        selectedAirport = null;
+        delayedSearch();
+    });
 
-    if (keywordType) keywordType.addEventListener('click', handleTypeClick);
-    if (selectType) selectType.addEventListener('click', handleTypeClick);
+    queryInput?.addEventListener('input', function () {
+        selectedAirport = null;
+        activeResultIndex = -1;
+        delayedSearch();
+    });
 
-    wrapper.addEventListener('click', event => {
-        const typeButton = event.target.closest('.chk_label[data-name]');
-        if (typeButton && wrapper.contains(typeButton)) {
-            handleTypeClick(event);
-            return;
-        }
+    queryInput?.addEventListener('focus', function () {
+        if (queryInput.value && resultHolder) resultHolder.style.display = 'block';
+    });
 
-        const resultItem = event.target.closest('.airport-search-result a.airport-item');
-        if (resultItem && wrapper.contains(resultItem)) {
+    wrapper.addEventListener('click', function (event) {
+        const airportItem = event.target.closest('a.airport-item');
+        const historyLink = event.target.closest('.airport-query-history a');
+
+        if (airportItem) {
             event.preventDefault();
             selectedAirport = {
-                icao: resultItem.dataset.icao,
-                name: resultItem.dataset.name,
-                nameEng: resultItem.dataset.nameEng
+                icao: airportItem.dataset.icao,
+                name: airportItem.dataset.name,
+                nameEng: airportItem.dataset.nameEng
             };
-            commitAirportSelection(selectedAirport);
-            return;
-        }
-
-        const historyLink = event.target.closest('.airport-query-history a[data-icao]');
-        if (historyLink && wrapper.contains(historyLink)) {
+            if (queryInput) queryInput.value = selectedAirport.name;
+            if (resultHolder) resultHolder.style.display = 'none';
+            saveAirportHistory(selectedAirport);
+            renderAirportHistory(wrapper);
+            applyAirportToRoute(selectedAirport);
+            if (queryInput) {
+                queryInput.value = '';
+                queryInput.focus();
+            }
+            activeResultIndex = -1;
+            selectedAirport = null;
+        } else if (historyLink) {
             event.preventDefault();
+            event.stopPropagation();
+            if (event.stopImmediatePropagation) event.stopImmediatePropagation();
             selectedAirport = {
                 icao: historyLink.dataset.icao,
-                name: historyLink.dataset.name || historyLink.textContent.replace(/\([^)]+\)/, ''),
-                nameEng: historyLink.dataset.nameEng || historyLink.textContent
+                name: historyLink.dataset.name,
+                nameEng: historyLink.dataset.nameEng
             };
-            commitAirportSelection(selectedAirport);
+            applyAirportToRoute(selectedAirport);
         }
     });
 
-    if (keywordInput) {
-        keywordInput.addEventListener('keyup', async event => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                const airports = await searchAirport(keywordInput.value.trim(), 1);
-                if (airports.length === 1) {
-                    commitAirportSelection(airports[0]);
-                }
-            } else {
-                selectedAirport = null;
-                startQueryDelayed(500);
+    wrapper.querySelectorAll('select[name="country"], select[name="airport"]').forEach(function (select) {
+        select.addEventListener('change', function () {
+            if (select.name === 'country') populateAirportOptions(wrapper);
+            selectedAirport = readSelectedAirportFromSelect(wrapper);
+            if (select.name === 'airport' && selectedAirport) {
+                saveAirportHistory(selectedAirport);
+                renderAirportHistory(wrapper);
+                applyAirportToRoute(selectedAirport);
             }
         });
+    });
 
-        keywordInput.addEventListener('focus', () => {
-            if (keywordInput.value.trim() && resultBox && resultBox.children.length > 0) {
-                resultBox.style.display = 'block';
-            }
-        });
-    }
-
-    if (searchButton) {
-        searchButton.addEventListener('click', event => {
+    wrapper.querySelectorAll('.btn-select').forEach(function (button) {
+        button.addEventListener('click', function (event) {
             event.preventDefault();
-            readSelectedAirport();
-            if (!commitAirportSelection(selectedAirport)) {
-                alert('조회하실 공항을 선택하세요.');
-                if (keywordInput && currentType === KEYWORD_TYPE) keywordInput.focus();
-            }
+            populateAirportOptions(wrapper);
+            selectedAirport = readSelectedAirportFromSelect(wrapper);
         });
-    }
+    });
 
-    if (countrySelect) {
-        countrySelect.addEventListener('change', () => {
-            renderAirportOptions(FALLBACK_AIRPORTS);
-        });
-    }
+    searchButton?.addEventListener('click', function (event) {
+        event.preventDefault();
 
-    if (airportSelect) {
-        airportSelect.addEventListener('change', () => {
-            readSelectedAirport();
-            commitAirportSelection(selectedAirport);
-        });
-    }
+        if (!hasRequiredRoute()) {
+            alert('출발공항과 도착공항을 선택하세요.');
+            const emptyInput = getAirportListModalInputs().find(function (input) {
+                return input.offsetParent !== null && input.value.trim() === '';
+            });
+            emptyInput?.focus();
+            return;
+        }
 
-    document.addEventListener('click', event => {
-        if (resultBox && !wrapper.contains(event.target)) {
-            resultBox.style.display = 'none';
+        syncRouteSearchSubmit(event);
+        closeModal('airport-list-modal');
+    });
+
+    document.addEventListener('click', function (event) {
+        if (!wrapper.contains(event.target) && resultHolder) {
+            resultHolder.style.display = 'none';
         }
     });
 
-    if (routeForm) {
-        routeForm.addEventListener('focusin', event => {
-            if (event.target.matches('input[name="icao"]')) {
-                lastFocusedRouteInput = event.target;
+    renderAirportHistory(wrapper);
+    setType('keyword-type');
+}
+
+function openAirportListModal(index) {
+    syncAirportListModalInputs();
+    setAirportListRouteIndex(index);
+    openModal('airport-list-modal');
+
+    const modal = document.getElementById('airport-list-modal');
+    const queryInput = modal?.querySelector('.airport-search-keyword input[name="q"]');
+    queryInput?.focus();
+}
+
+function initAirportListModalSearch() {
+    const modal = document.getElementById('airport-list-modal');
+    if (!modal) return;
+
+    getRouteInputs().forEach(function (input, index) {
+        input.dataset.routeIndex = index;
+        input.addEventListener('focus', function () {
+            lastFocusedRouteInput = input;
+            setAirportListRouteIndex(index);
+        });
+        input.addEventListener('click', function () {
+            lastFocusedRouteInput = input;
+            setAirportListRouteIndex(index);
+        });
+    });
+
+    getAirportListModalInputs().forEach(function (input) {
+        input.addEventListener('focus', function () {
+            setAirportListRouteIndex(input.dataset.routeIndex);
+        });
+        input.addEventListener('click', function () {
+            setAirportListRouteIndex(input.dataset.routeIndex);
+        });
+        input.addEventListener('input', function () {
+            const routeInputs = getRouteInputs();
+            const routeInput = routeInputs[Number(input.dataset.routeIndex)];
+            clearAirportInputMeta(input);
+            if (routeInput) {
+                routeInput.value = input.value.toUpperCase();
+                clearAirportInputMeta(routeInput);
             }
         });
+    });
 
-        routeForm.addEventListener('click', event => {
-            if (event.target.matches('input[name="icao"]')) {
-                lastFocusedRouteInput = event.target;
-            }
+    document.querySelectorAll('.route-airport-list-btn').forEach(function (button) {
+        button.addEventListener('click', function () {
+            const routeInputs = getRouteInputs();
+            const focusedIndex = routeInputs.indexOf(lastFocusedRouteInput);
+            openAirportListModal(focusedIndex >= 0 ? focusedIndex : 0);
         });
+    });
 
-        routeForm.addEventListener('input', event => {
-            if (event.target.matches('input[name="icao"]')) {
-                lastFocusedRouteInput = event.target;
-                event.target.value = event.target.value.toUpperCase();
-                routeSearchCommitted = false;
-                syncRouteViewState();
-            }
-        });
-    }
-
-    setType(KEYWORD_TYPE);
-    renderAirportHistory();
+    modal.querySelectorAll('.main_sls_form').forEach(initAirportSearchForm);
+    setAirportListRouteIndex(0);
 }
 
 
@@ -841,16 +1178,21 @@ function initMapTabButtons() {
 // 모달창 (메테오그램 / SIGMET·AIRMET)
 // ================================================
 function openModal(modalId, tabIndex) {
-    document.getElementById(modalId).classList.add('open');
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.add('open');
     switchModalTab(modalId, tabIndex);
 }
 
 function closeModal(modalId) {
-    document.getElementById(modalId).classList.remove('open');
+    const modal = document.getElementById(modalId);
+    if (!modal) return;
+    modal.classList.remove('open');
 }
 
 function switchModalTab(modalId, index) {
     const modal = document.getElementById(modalId);
+    if (!modal) return;
     modal.querySelectorAll('.modal-tab').forEach((t, i) => t.classList.toggle('active', i === index));
     modal.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === index));
 }
@@ -861,6 +1203,39 @@ function initModalOverlayClose() {
         overlay.addEventListener('click', function (e) {
             if (e.target === this) closeModal(this.id);
         });
+    });
+}
+
+// 희원-확대축소
+function initSigairImageZoom() {
+    const MIN_SCALE = 0.5;
+    const MAX_SCALE = 4;
+    const STEP = 0.2;
+
+    document.querySelectorAll('[data-sigair-zoom]').forEach(zoomBox => {
+        let scale = 1;
+
+        function applyZoom(nextScale) {
+            scale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, nextScale));
+            zoomBox.style.setProperty('--sigair-zoom-scale', scale.toFixed(2));
+        }
+
+        zoomBox.querySelectorAll('[data-zoom-action]').forEach(button => {
+            button.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+
+                const action = button.dataset.zoomAction;
+                if (action === 'in') applyZoom(scale + STEP);
+                if (action === 'out') applyZoom(scale - STEP);
+                if (action === 'reset') applyZoom(1);
+            });
+        });
+
+        zoomBox.addEventListener('wheel', event => {
+            event.preventDefault();
+            applyZoom(scale + (event.deltaY < 0 ? STEP : -STEP));
+        }, { passive: false });
     });
 }
 
@@ -881,11 +1256,13 @@ function initAirportWeatherPortRadios() {
 // 초기화
 // ================================================
 initRouteQueryValues();
+initRouteInputAutocomplete();
+initAirportListModalSearch();
 initFlightTypeOptionClicks();
-initAirportListPanel();
 initMapOpenToggle();
 initMapTabButtons();
 initModalOverlayClose();
+initSigairImageZoom();
 initAirportWeatherPortRadios();
 
 syncAirportWeatherStopover(isStopoverRoute());

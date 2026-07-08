@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -82,7 +82,7 @@
             </div>
             <div class="header" id="openheader">
                 <!-- 2025-07-01 이전 메뉴 보기 임시 제거 -->
-                <!--	
+                <!--
      <div class="past-menu" id="past-menu-con" style="">
 		<div class="past-menu-content">
 			<button type="button" class="openBtn">항공날씨 <span>이전 메뉴</span> 보기</button>
@@ -131,7 +131,6 @@
                                         class="fas fa-bars mr-3 fa-2x"></i></a>
                             </div>
                         </div>
-
 
                     </div>
                 </div>
@@ -1472,9 +1471,11 @@
                             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" />
                         <link rel="stylesheet"
                             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,1,0" />
-                        <link rel="stylesheet" href="./air/항공날씨_files/new.css">
+                        <link rel="stylesheet" href="./air/항공날씨_files/new.css?v=20260708-10">
+                        <link rel="stylesheet" href="./air/항공날씨_files/amo-main-sls-form.css?v=20260708-10">
                         <link rel="stylesheet" href="./air/항공날씨_files/image-player.css">
-                        <script src="./air/항공날씨_files/new.js" defer></script>
+                        <script src="./air/항공날씨_files/world-airport-data.js?v=20260708-10"></script>
+                        <script src="./air/항공날씨_files/new.js?v=20260708-10" defer></script>
 
                         <div class="sub-title" style="display: flex; justify-content: space-between;">
                             <h4>운항기상 종합정보</h4>
@@ -1504,21 +1505,18 @@
 
                                     <div class="text-box p-r-5 airportweather-world-search" style="margin-left: 16px;">
                                         <label class="airportweather-world-label">출발</label>
-                                        <input type="text" name="icao" class="tex-input" placeholder="출발공항"
-                                            onblur="this.value=this.value.toUpperCase();">
+                                        <input type="text" name="icao" class="tex-input" placeholder="출발공항">
                                     </div>
 
                                     <div class="text-box p-r-5 airportweather-world-search" id="stopover-box"
                                         style="display: none;">
                                         <label class="airportweather-world-label">경유</label>
-                                        <input type="text" name="icao" class="tex-input" placeholder="경유공항"
-                                            onblur="this.value=this.value.toUpperCase();">
+                                        <input type="text" name="icao" class="tex-input" placeholder="경유공항">
                                     </div>
 
                                     <div class="text-box p-r-5 airportweather-world-search">
                                         <label class="airportweather-world-label">도착</label>
-                                        <input type="text" name="icao" class="tex-input" placeholder="도착공항"
-                                            onblur="this.value=this.value.toUpperCase();">
+                                        <input type="text" name="icao" class="tex-input" placeholder="도착공항">
                                     </div>
 
                                     <div class="btn_wrap">
@@ -1532,59 +1530,94 @@
                                     <div style="display: inline-block;">지도 닫기</div>
                                 </div>
                             </div>
-                        </form>
 
-                        <div id="route-airport-panel" class="route-airport-panel" aria-hidden="true">
-                            <div class="route-airport-panel-inner main_sls_form">
+                            <div class="modal-overlay" id="airport-list-modal">
+                                <div class="modal-box">
+                                    <div class="modal-header">
+                                        <span>공항목록</span>
+                                        <button class="modal-close"
+                                            onclick="closeModal('airport-list-modal')">✕</button>
+                                    </div>
+                                    <div class="modal-tabs">
+                                        <div class="text-box p-r-5 airportweather-world-search">
+                                            <label class="airportweather-world-label">출발</label>
+                                            <input type="text" name="icao" class="tex-input" placeholder="출발공항"
+                                                data-route-index="0">
+                                        </div>
 
-                                <div class="route-airport-options chk_box">
-                                    <p class="input_chk route-airport-option">
-                                        <a href="#" class="chk_label active" data-name="keyword-type">
-                                            <span class="route-check-mark" aria-hidden="true"></span>
-                                            <span>키워드 검색</span>
-                                        </a>
-                                    </p>
-                                    <p class="input_chk route-airport-option">
-                                        <a href="#" class="chk_label" data-name="select-type">
-                                            <span class="route-check-mark" aria-hidden="true"></span>
-                                            <span>목록 검색</span>
-                                        </a>
-                                    </p>
-                                </div>
-                                <div class="route-airport-main">
-                                    <div class="input_box airport-search-keyword">
-                                        <input type="text" name="q" class="route-airport-keyword"
-                                            placeholder="세계 공항명 또는 공항코드를 입력하세요." title="검색어">
-                                        <ul class="airport-search-result"></ul>
-                                        <p class="search_text">
-                                            최근 조회 공항 -
-                                            <span class="airport-query-history">
-                                                <a href="#" data-icao="RKSI">인천국제공항(RKSI)</a>
-                                            </span>
-                                        </p>
-                                    </div>
-                                    <div class="input_box airport-search-select" style="display:none;">
-                                        <div>
-                                            <b><label for="route-select-country">국가 선택</label></b>
-                                            <select id="route-select-country" name="country" class="main-select-option">
-                                                <option value="">선택</option>
-                                            </select>
+                                        <div class="text-box p-r-5 airportweather-world-search"
+                                            id="airport-list-stopover-box" style="display: none;">
+                                            <label class="airportweather-world-label">경유</label>
+                                            <input type="text" name="icao" class="tex-input" placeholder="경유공항"
+                                                data-route-index="1">
                                         </div>
-                                        <div>
-                                            <b><label for="route-select-airport">공항 선택</label></b>
-                                            <select id="route-select-airport" name="airport" class="main-select-option">
-                                                <option value="">선택</option>
-                                            </select>
+
+                                        <div class="text-box p-r-5 airportweather-world-search">
+                                            <label class="airportweather-world-label">도착</label>
+                                            <input type="text" name="icao" class="tex-input" placeholder="도착공항"
+                                                data-route-index="2">
                                         </div>
-                                        <p class="search_text">
-                                            최근 조회 공항 -
-                                            <span class="airport-query-history"></span>
-                                        </p>
                                     </div>
-                                    <button type="button" name="search" class="route-airport-search-btn">조회</button>
+
+                                    <div class="modal-body">
+                                        <div class="main_sls_form">
+                                            <div style="display: flex; gap: 16px;">
+                                                <div class="chk_box">
+                                                    <p class="input_chk"><a href="#" class="chk_label active"
+                                                            data-name="keyword-type" data-checked="true" title="선택됨">키워드
+                                                            검색</a></p>
+                                                    <p class="input_chk"><a href="#" class="chk_label"
+                                                            data-name="select-type" data-checked="false">목록 검색</a></p>
+                                                </div><!-- chk_box -->
+                                                <div class="input_box airport-search-keyword">
+                                                    <input type="text" name="q" placeholder="세계 공항명 또는 공항코드를 입력하세요."
+                                                        title="검색어">
+                                                    <ul class="airport-search-result"></ul>
+                                                    <p class="search_text">최근 조회 공항 - <span
+                                                            class="airport-query-history"><a
+                                                                href="/weather/airport.do?icaoCode=RKSI"
+                                                                data-icao="RKSI" data-name="인천 국제공항"
+                                                                data-name-eng="Incheon International Airport">인천
+                                                                국제공항(RKSI)</a></span></p>
+                                                </div><!-- input_box -->
+                                                <div class="input_box airport-search-select" style="display:none;">
+                                                    <!-- <div>
+         <b><label for="main-select-continent">대륙 선택</label></b>
+         <select id="main-select-continent" name="continent" class="main-select-option">
+          <option value="">선택</option>
+         </select>
+        </div> -->
+                                                    <div>
+                                                        <b><label for="main-select-country">국가 선택</label></b>
+                                                        <select id="main-select-country" name="country"
+                                                            class="main-select-option">
+                                                            <option value="">선택</option>
+                                                        </select>
+                                                        <button type="button" class="btn-select"
+                                                            data-name="country">선택</button>
+                                                    </div>
+                                                    <div>
+                                                        <b><label for="main-select-airport">공항 선택</label></b>
+                                                        <select id="main-select-airport" name="airport"
+                                                            class="main-select-option">
+                                                            <option value="">선택</option>
+                                                        </select>
+                                                    </div>
+                                                    <p class="search_text">최근 조회 공항 - <span
+                                                            class="airport-query-history"><a
+                                                                href="/weather/airport.do?icaoCode=RKSI"
+                                                                data-icao="RKSI" data-name="인천 국제공항"
+                                                                data-name-eng="Incheon International Airport">인천
+                                                                국제공항(RKSI)</a></span></p>
+                                                </div><!-- input_box -->
+
+                                            </div>
+                                            <button type="submit" class="input-submit">조회</button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        </form>
 
                         <div class="world_map_wrap is-open route-map-only">
                             <!-- ====== GIS 지도 ====== -->
@@ -1747,56 +1780,56 @@
                                                     <div class="sigwx-radiobtn-box">
                                                         <div class="wintem-radiobtn area-radio">
                                                             <input type="radio" name="area" value="EastAsia:"
-                                                                id="area-ea" checked=""> <label for="area-ea"
-                                                                class="m-r-20 m-l-10">EastAsia</label>
+                                                                id="area-ea" checked=""><span
+                                                                class="airportweather-world-label">EastAsia</span>
                                                         </div>
                                                         <div class="wintem-radiobtn area-radio">
                                                             <input type="radio" name="area" value="Korea:" id="area-ko">
-                                                            <label for="area-ko" class="m-r-20 m-l-10">Korea</label>
+                                                            <span class="airportweather-world-label">Korea</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="KoreaFIR:"
-                                                                id="area-6"> <label for="area-6"
-                                                                class="m-r-20 m-l-10">KoreaFIR</label>
+                                                                id="area-6"> <span
+                                                                class="airportweather-world-label">KoreaFIR</span>
                                                         </div>
                                                         <div class="wintem-radiobtn area-radio">
                                                             <input type="radio" name="area" value="Asia:" id="area-a">
-                                                            <label for="area-a" class="m-r-20 m-l-10">Asia</label>
+                                                            <span class="airportweather-world-label">Asia</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="ICAOAreaA:"
-                                                                id="area-1"> <label for="area-1"
-                                                                class="m-r-20 m-l-10">A</label>
+                                                                id="area-1"> <span
+                                                                class="airportweather-world-label">A</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="ICAOAreaC:"
-                                                                id="area-3"> <label for="area-3"
-                                                                class="m-r-20 m-l-10">C</label>
+                                                                id="area-3"> <span
+                                                                class="airportweather-world-label">C</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="ICAOAreaD:"
-                                                                id="area-4"> <label for="area-4"
-                                                                class="m-r-20 m-l-10">D</label>
+                                                                id="area-4"> <span
+                                                                class="airportweather-world-label">D</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="ICAOAreaE:"
-                                                                id="area-5"> <label for="area-5"
-                                                                class="m-r-20 m-l-10">E</label>
+                                                                id="area-5"> <span
+                                                                class="airportweather-world-label">E</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="ICAOAreaG:"
-                                                                id="area-7"> <label for="area-7"
-                                                                class="m-r-20 m-l-10">G</label>
+                                                                id="area-7"> <span
+                                                                class="airportweather-world-label">G</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="ICAOAreaL:"
-                                                                id="area-12"> <label for="area-12"
-                                                                class="m-r-20 m-l-10">L</label>
+                                                                id="area-12"> <span
+                                                                class="airportweather-world-label">L</span>
                                                         </div>
                                                         <div class="sigwx-radiobtn area-radio">
                                                             <input type="radio" name="area" value="ICAOAreaM:"
-                                                                id="area-13" checked=""> <label for="area-13"
-                                                                class="m-r-20 m-l-10">M</label>
+                                                                id="area-13"> <span
+                                                                class="airportweather-world-label">M</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1876,47 +1909,47 @@
                                                 <div class="wintem-radiobtn-box">
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_EastAsia_"
-                                                            id="area-ea" checked=""> <label for="area-ea"
-                                                            class="m-r-20 m-l-10">EastAsia</label>
+                                                            id="area-ea" checked=""> <span
+                                                            class="airportweather-world-label">EastAsia</span>
                                                     </div>
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_Korea_"
-                                                            id="area-ko"> <label for="area-ko"
-                                                            class="m-r-20 m-l-10">Korea</label>
+                                                            id="area-ko"> <span
+                                                            class="airportweather-world-label">Korea</span>
                                                     </div>
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_Asia_"
-                                                            id="area-a"> <label for="area-a"
-                                                            class="m-r-20 m-l-10">Asia</label>
+                                                            id="area-a"> <span
+                                                            class="airportweather-world-label">Asia</span>
                                                     </div>
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_ICAOAreaA_"
-                                                            id="area-1"> <label for="area-1"
-                                                            class="m-r-20 m-l-10">A</label>
+                                                            id="area-1"> <span
+                                                            class="airportweather-world-label">A</span>
                                                     </div>
                                                     <!-- <div class="wintem-radiobtn area-radio">
 							<input type="radio" name="area" value="WT_KWBC_ICAOAreaB1_" id="area-2"> <label for="area-2" class="m-r-20 m-l-10">B1</label>
 						</div> -->
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_ICAOAreaC_"
-                                                            id="area-3"> <label for="area-3"
-                                                            class="m-r-20 m-l-10">C</label>
+                                                            id="area-3"> <span
+                                                            class="airportweather-world-label">C</span>
                                                     </div>
                                                     <!-- <div class="wintem-radiobtn area-radio">
 							<input type="radio" name="area" value="WT_KWBC_ICAOAreaD_" id="area-4"> <label for="area-4" class="m-r-20 m-l-10">D</label>
 						</div> -->
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_ICAOAreaE_"
-                                                            id="area-5"> <label for="area-5"
-                                                            class="m-r-20 m-l-10">E</label>
+                                                            id="area-5"> <span
+                                                            class="airportweather-world-label">E</span>
                                                     </div>
                                                     <!-- <div class="wintem-radiobtn area-radio">
 							<input type="radio" name="area" value="WT_KWBC_ICAOAreaF_" id="area-6"> <label for="area-6" class="m-r-20 m-l-10">F</label>
 						</div> -->
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_ICAOAreaG_"
-                                                            id="area-7"> <label for="area-7"
-                                                            class="m-r-20 m-l-10">G</label>
+                                                            id="area-7"> <span
+                                                            class="airportweather-world-label">G</span>
                                                     </div>
                                                     <!-- <div class="wintem-radiobtn area-radio">
 							<input type="radio" name="area" value="WT_KWBC_ICAOAreaH_" id="area-8"> <label for="area-8" class="m-r-20 m-l-10">H</label>
@@ -1932,13 +1965,13 @@
 						</div> -->
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_ICAOAreaL_"
-                                                            id="area-12"> <label for="area-12"
-                                                            class="m-r-20 m-l-10">L</label>
+                                                            id="area-12"> <span
+                                                            class="airportweather-world-label">L</span>
                                                     </div>
                                                     <div class="wintem-radiobtn area-radio">
                                                         <input type="radio" name="area" value="WT_KWBC_ICAOAreaM_"
-                                                            id="area-13"> <label for="area-13"
-                                                            class="m-r-20 m-l-10">M</label>
+                                                            id="area-13"> <span
+                                                            class="airportweather-world-label">M</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -2292,32 +2325,32 @@
                                                             <div class="sigwx-radiobtn">
                                                                 <input type="radio" name="hpa_gdaps" value="20"
                                                                     id="wt20" checked="">
-                                                                <label for="wt20" class="m-r-20 m-l-10">39,000ft</label>
+                                                                <span class="airportweather-world-label">39,000ft</span>
                                                             </div>
                                                             <div class="sigwx-radiobtn">
                                                                 <input type="radio" name="hpa_gdaps" value="30"
                                                                     id="wt30">
-                                                                <label for="wt30" class="m-r-20 m-l-10">30,000ft</label>
+                                                                <span class="airportweather-world-label">30,000ft</span>
                                                             </div>
                                                             <div class="sigwx-radiobtn">
                                                                 <input type="radio" name="hpa_gdaps" value="50"
                                                                     id="wt50">
-                                                                <label for="wt50" class="m-r-20 m-l-10">18,000ft</label>
+                                                                <span class="airportweather-world-label">18,000ft</span>
                                                             </div>
                                                             <div class="sigwx-radiobtn">
                                                                 <input type="radio" name="hpa_gdaps" value="70"
                                                                     id="wt70">
-                                                                <label for="wt70" class="m-r-20 m-l-10">10,000ft</label>
+                                                                <span class="airportweather-world-label">10,000ft</span>
                                                             </div>
                                                             <div class="sigwx-radiobtn">
                                                                 <input type="radio" name="hpa_gdaps" value="85"
                                                                     id="wt85">
-                                                                <label for="wt85" class="m-r-20 m-l-10">5,000ft</label>
+                                                                <span class="airportweather-world-label">5,000ft</span>
                                                             </div>
                                                             <div class="sigwx-radiobtn">
                                                                 <input type="radio" name="hpa_gdaps" value="92"
                                                                     id="wt92">
-                                                                <label for="wt92" class="m-r-20 m-l-10">2,500ft</label>
+                                                                <span class="airportweather-world-label">2,500ft</span>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -2502,8 +2535,17 @@
                                     </div>
                                     <div class="modal-body">
                                         <div class="tab-panel active">
-                                            <img src="./air/항공날씨_files/new/SITMET.png" alt="sigmet-icon"
-                                                style="width:50%; border-radius:8px;">
+                                            <!-- 희원-확대축소 -->
+                                            <div class="sigair-zoom" data-sigair-zoom>
+                                                <div class="sigair-zoom-controls" aria-label="이미지 확대 축소">
+                                                    <button type="button" data-zoom-action="out" title="축소">−</button>
+                                                    <button type="button" data-zoom-action="reset"
+                                                        title="초기화">100%</button>
+                                                    <button type="button" data-zoom-action="in" title="확대">+</button>
+                                                </div>
+                                                <img class="sigair-zoom-image" src="./air/항공날씨_files/new/SITMET.png"
+                                                    alt="sigmet-icon">
+                                            </div>
                                             <div class="sig_info">
                                                 <div class="sig_row">
                                                     <span class="sig_label">번호</span>
@@ -2531,8 +2573,17 @@
                                             </div>
                                         </div>
                                         <div class="tab-panel">
-                                            <img src="./air/항공날씨_files/new/SITMET.png" alt="sigmet-icon"
-                                                style="width:50%; border-radius:8px;">
+                                            <!-- 희원-확대축소 -->
+                                            <div class="sigair-zoom" data-sigair-zoom>
+                                                <div class="sigair-zoom-controls" aria-label="이미지 확대 축소">
+                                                    <button type="button" data-zoom-action="out" title="축소">−</button>
+                                                    <button type="button" data-zoom-action="reset"
+                                                        title="초기화">100%</button>
+                                                    <button type="button" data-zoom-action="in" title="확대">+</button>
+                                                </div>
+                                                <img class="sigair-zoom-image" src="./air/항공날씨_files/new/SITMET.png"
+                                                    alt="sigmet-icon">
+                                            </div>
                                             <div class="sig_info">
                                                 <div class="sig_row">
                                                     <span class="sig_label">번호</span>
@@ -7600,7 +7651,7 @@
                                         subNavMenu += '<li><button><span>' + nowMenu3 + '</span><i class="fas fa-angle-down"></i></button>' + subNavMenu3 + '</li>'
                                     }
 
-                                    //subNavMenu += '<li><button><span>'+nowMenu3+'</span><i class="fas fa-angle-down"></i></button>' + subNavMenu3 + '</li>'																								 
+                                    //subNavMenu += '<li><button><span>'+nowMenu3+'</span><i class="fas fa-angle-down"></i></button>' + subNavMenu3 + '</li>'
                                 }
 
                                 $('#subNavMenu').html(subNavMenu);
@@ -8126,8 +8177,8 @@
                             setCookie('pastShow','hide',1);
                             $('#past-menu-con').hide();
                         })
-                    	
-                    	
+
+
                         if(getCookie('pastShow')!='hide'){
                             $("#past-menu-con").show();
                         }else{
