@@ -600,12 +600,6 @@ input[type="radio"] {
     width: 100%;
 }
 
-/* .SIGWX_content .sigwx-mid-form-box input[type="radio"],
-.WINTEM_content .wintem-form-box input[type="radio"],
-.WIND_TEMP_content .sigwx-mid-form-box input[type="radio"] {
-    display: none !important;
-} */
-
 .area-radio {
     display: flex;
     gap: 4px;
@@ -1058,6 +1052,13 @@ input[type="radio"] {
     width: 40% !important;
 }
 
+#meteogram-modal .modal-box {
+    width: min(88vw, 900px) !important;
+    height: 95vh;
+    max-height: 95vh;
+    overflow: hidden;
+}
+
 #sigmet-airmet-modal .modal-box {
     width: 70%;
 }
@@ -1124,7 +1125,67 @@ input[type="radio"] {
 }
 
 #meteogram-modal .modal-body {
-    padding: 40px;
+    height: auto;
+    padding: 24px 56px 28px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+#meteogram-modal .modal-tabs {
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding: 0 16px;
+    align-items: flex-end;
+    background: #fff;
+}
+
+#meteogram-modal .modal-tab {
+    height: 40px;
+    min-width: 80px;
+    padding: 0 22px;
+    font-size: 14px;
+    line-height: 39px;
+    color: #777;
+    background: #fff;
+}
+
+#meteogram-modal .modal-tab.active {
+    font-size: 14px;
+    color: #fff;
+    background: #2D6FB7;
+}
+
+#meteogram-modal .tab-panel {
+    width: 100%;
+    min-height: 0;
+    overflow: hidden;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+#meteogram-modal .zoom-box {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+#meteogram-modal .zoom-img {
+    width: auto;
+    height: 100%;
+}
+
+#meteogram-modal .zoom-img img {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+#meteogram-modal .zoom-box>.jvectormap-zoomin,
+#meteogram-modal .zoom-box>.jvectormap-zoomout {
+    right: -44px;
 }
 
 #sigmet-airmet-modal .modal-body {
@@ -1158,6 +1219,7 @@ input[type="radio"] {
 }
 
 .tab-panel {
+    height: 100%;
     display: none;
 }
 
@@ -1173,7 +1235,6 @@ input[type="radio"] {
 
 .zoom-img {
     width: 100%;
-    overflow: hidden;
     cursor: default;
     touch-action: none;
 }
@@ -1245,14 +1306,6 @@ input[type="radio"] {
     gap: 4px;
 }
 
-/* .zom-wrap>* {
-    width: 28px;
-    height: 28px;
-    border-radius: 4px;
-    font-size: 16px;
-    border: 1px solid #ddd;
-} */
-
 
 /* ================================================
    국내공항 여행 날씨
@@ -1266,6 +1319,12 @@ input[type="radio"] {
     flex: 1;
 }
 
+.airportweather-world-search {
+    position: relative;
+    gap: 4px;
+    justify-content: center;
+}
+
 .airportweather-world-search>input {
     position: relative;
     display: flex;
@@ -1277,19 +1336,6 @@ input[type="radio"] {
     overflow: hidden;
     color: #4d4d4d;
     padding: 4px 10px;
-}
-
-.airportweather-world-search {
-    gap: 4px;
-    justify-content: center;
-}
-
-.sub-text-input .airportweather-world-search {
-    position: relative;
-}
-
-.airportweather-world-search>input {
-    width: 170px;
 }
 
 .sub-text-input .route-airport-suggest-list {
