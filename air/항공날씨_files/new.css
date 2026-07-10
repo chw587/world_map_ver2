@@ -850,12 +850,25 @@ input[type="radio"] {
     flex-direction: column;
 }
 
+.Airport_Weather_content #pdf-wrap {
+    display: flex;
+    max-height: 830px;
+    overflow-y: auto;
+    flex-direction: column;
+    gap: 16px;
+}
+
 .Airport_Weather_content .pdf-pages {
     display: flex;
 }
 
 .Airport_Weather_content .pdf-pages img {
-    width: 50%;
+    flex: 1 1 0;
+    width: 0;
+    min-width: 0;
+    max-width: 100%;
+    height: auto;
+    display: block;
     cursor: pointer;
 }
 
@@ -918,13 +931,12 @@ input[type="radio"] {
 }
 
 .WIND_TEMP_content>div>div:last-child {
-    max-height: 680px;
     overflow-y: auto;
     padding: 24px;
 }
 
 .WIND_TEMP_content>div>div:last-child img {
-    width: 70%;
+    width: 60%;
 }
 
 /* << METAR/TAF >> */
@@ -1284,10 +1296,26 @@ input[type="radio"] {
 
 .zoom-box>.jvectormap-zoomin {
     top: 10px;
+    -webkit-user-select: none;
+    /* 크롬, 사파리, 오페라 */
+    -moz-user-select: none;
+    /* 파이어폭스 */
+    -ms-user-select: none;
+    /* 인터넷 익스플로러, 엣지 */
+    user-select: none;
+    /* 표준 문법 */
 }
 
 .zoom-box>.jvectormap-zoomout {
     top: 42px;
+    -webkit-user-select: none;
+    /* 크롬, 사파리, 오페라 */
+    -moz-user-select: none;
+    /* 파이어폭스 */
+    -ms-user-select: none;
+    /* 인터넷 익스플로러, 엣지 */
+    user-select: none;
+    /* 표준 문법 */
 }
 
 .zoom-box>.jvectormap-zoomin:hover,
@@ -1328,7 +1356,7 @@ input[type="radio"] {
 .airportweather-world-search>input {
     position: relative;
     display: flex;
-    width: 170px !important;
+    max-width: 170px !important;
     height: 20px;
     font-size: 12px;
     border: 1px solid #ddd;
@@ -1387,34 +1415,7 @@ input[type="radio"] {
 #airport-list-modal .main_sls_form button {
     align-self: flex-end;
     width: fit-content;
-}
-
-#airport-list-modal .chk_box {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin: 0px;
-}
-
-#airport-list-modal .input_chk {
-    margin: 0;
-}
-
-#airport-list-modal .chk_label {
-    display: inline-flex;
-    align-items: center;
-    min-height: 34px;
-    padding: 0 14px;
-    border: 1px solid #ccd7e5;
-    border-radius: 4px;
-    color: #345;
-    background: #fff;
-}
-
-#airport-list-modal .chk_label.active {
-    border-color: #2D6FB7;
-    background: #2D6FB7;
-    color: #fff;
+    height: 32px;
 }
 
 #airport-list-modal .input_box {
@@ -1468,7 +1469,6 @@ input[type="radio"] {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 10px;
 }
 
 #airport-list-modal .airport-search-select b {
@@ -1488,6 +1488,16 @@ input[type="radio"] {
 
 #airport-list-modal .airport-search-select select option {
     font-size: 12px;
+}
+
+#airport-list-modal .airport-search-select>div {
+    width: 100%;
+    display: flex;
+    gap: 16px;
+}
+
+#airport-list-modal .airport-search-select>div>div {
+    flex: 1;
 }
 
 #airport-list-modal .btn-select,
