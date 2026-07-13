@@ -216,6 +216,26 @@ function syncMetReport(port, icao) {
     }
 }
 
+// 260713: METAR 여러 줄(관측시각 다른 3개) + 비행조건(VFR 등) 데이터를 만들어주는 헬퍼
+function buildMetarEntries(icao) {
+    // 260713: 이미지 양식처럼 최근 관측 3건을 최신순으로 구성 (실제 데이터 연동 전까지의 표시용 샘플)
+    return [
+        { text: `METAR ${icao} 210730Z 22012KT 190V280 CAVOK 12/07 Q1017 NOSIG RMK ASIAN DUST(HWANGSA)=`, flight: 'VFR' },
+        { text: `METAR ${icao} 210700Z 23012KT 190V280 CAVOK 12/07 Q1017 NOSIG=`, flight: 'VFR' },
+        { text: `METAR ${icao} 210630Z 23011KT 180V250 CAVOK 11/07 Q1017 NOSIG=`, flight: 'VFR' }
+    ];
+}
+
+// 260713: metar_info(ul) 안을 이미지 양식(줄마다 <li><p>본문</p><span class="metar_flag">비행조건</span></li>)대로 채움
+function renderMetarInfo(metarInfo, icao) {
+    if (!metarInfo) return;
+
+    const entries = buildMetarEntries(icao);
+    metarInfo.innerHTML = entries.map(function (entry) {
+        return `<li><p>${entry.text}</p><span class="metar_flag">${entry.flight}</span></li>`;
+    }).join('');
+}
+
 function setRoutePortContent(selector, airport) {
     const port = document.querySelector(selector);
     const icao = airport?.icao || '';
@@ -231,9 +251,8 @@ function setRoutePortContent(selector, airport) {
         portName.textContent = airport.name || '';
         portName.title = airport.name || airport.nameEng || '';
     }
-    if (metarInfo) {
-        metarInfo.innerHTML = `<p>METAR ${icao} 210730Z 22012KT 190V280 CAVOK 12/07 Q1017 NOSIG RMK ASIAN DUST(HWANGSA)=</p>`;
-    }
+    // 260713: 단일 <p> 대신 이미지 양식(3줄 + VFR)으로 렌더링
+    renderMetarInfo(metarInfo, icao);
     if (tafInfo) {
         tafInfo.innerHTML = `
             <p>TAF ${icao} 210500Z 2106/2212 21008KT 6000 NSC</p>

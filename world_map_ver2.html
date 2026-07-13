@@ -2022,7 +2022,7 @@
                                         </div>
 
                                         <div class="pdf-pages" id="arrive-pages">
-                                            <div style="width: 500px; height: 500px; background-color: yellowS;"></div>
+                                            <div style="width: 500px; height: 500px; background-color: yellow;"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -2275,7 +2275,7 @@
                                 <div class="WIND_TEMP_content map_content">
                                     <div class="GDAPS">
                                         <div class="sub-form sigwx-mid-form-box" id="openTerms">
-                                            
+
                                             <form id="frm" name="frm" method="post" target="ifrm"
                                                 action="/weatherMap/detail-wind-temp-list.do">
                                                 <input id="dirPath" type="hidden" name="dirPath"
@@ -2285,7 +2285,7 @@
                                                 <input id="gubun" type="hidden" name="gubun" value="detail-wind-temp">
                                                 <input type="hidden" name="hpa" id="hpaHidden" value="20">
                                                 <div class="tab-content-box active" id="tab-1">
-                                                    <div class="sub-radiobtn m-b-5">
+                                                    <div class="sub-radiobtn">
                                                         <h4 class="sub-radiobtn-title">고도별</h4>
                                                         <div class="sigwx-radiobtn-box">
                                                             <div class="sigwx-radiobtn">
@@ -2323,6 +2323,27 @@
                                                 </div>
 
                                             </form>
+
+                                            <div class="control-movi-wrap image-control-form-player">
+                                                <div class="play-buttons-wrap">
+                                                    <div class="left-btn playbtn" data-role="prev-slide"></div>
+                                                    <div class="play-buttons playbtn" data-role="play-slide">
+                                                        <div id="first" class="play playbtn"></div>
+                                                        <div id="second" class="play playbtn"></div>
+                                                    </div>
+                                                    <div class="right-btn playbtn" data-role="next-slide"></div>
+                                                </div>
+
+                                                <div class="control-movi-lap">
+                                                    <div
+                                                        class="movi-line ui-slider ui-corner-all ui-slider-horizontal ui-widget ui-widget-content">
+                                                        <span tabindex="0"
+                                                            class="ui-slider-handle ui-corner-all ui-state-default"
+                                                            style="left: 0%;">02일09시(KST)</span>
+                                                    </div>
+                                                    <div class="movi-bar-wrap" style="width: 0%;"></div>
+                                                </div>
+                                            </div>
                                         </div>
 
                                         <div class="GDAPS_img">
@@ -2379,10 +2400,24 @@
                                         <div class="port-info">
                                             <div class="metar">
                                                 <div class="matar_title">METAR</div>
-                                                <div class="metar_info">
-                                                    <P>METAR RKSI 210730Z 22012KT 190V280 CAVOK 12/07 Q1017 NOSIG
-                                                        RMK ASIAN DUST(HWANGSA)=</P>
-                                                </div>
+                                                <!-- 260713 -->
+                                                <ul class="metar_info">
+                                                    <li>
+                                                        <P>METAR RKSI 130600Z 22009KT 170V250 CAVOK 32/24 Q1008 NOSIG=
+                                                        </P>
+                                                        <span class="metar_flag">VFR</span>
+                                                    </li>
+                                                    <li>
+                                                        <P>METAR RKSI 130530Z 23009KT 170V250 CAVOK 32/24 Q1009 NOSIG=
+                                                        </P>
+                                                        <span class="metar_flag">VFR</span>
+                                                    </li>
+                                                    <li>
+                                                        <P>METAR RKSI 130500Z 23011KT 180V250 CAVOK 31/25 Q1009 NOSIG=
+                                                        </P>
+                                                        <span class="metar_flag">VFR</span>
+                                                    </li>
+                                                </ul>
                                             </div>
                                             <div class="taf">
                                                 <div class="taf_title">TAF</div>

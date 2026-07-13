@@ -912,6 +912,11 @@ input[type="radio"] {
     align-items: center;
 }
 
+.WIND_TEMP_content .sub-form > * {
+    width: 50%;
+    margin: 0;
+}
+
 .WIND_TEMP_content .sub-form>span {
     display: inline-block;
     height: 25px;
@@ -1005,7 +1010,6 @@ input[type="radio"] {
 
 .port-info>div {
     display: flex;
-    padding: 8px;
 }
 
 .port-info .metar,
@@ -1016,17 +1020,53 @@ input[type="radio"] {
 .matar_title,
 .met_report_title,
 .taf_title {
-    width: 100px;
+    width: 180px;
     padding: 8px;
 }
 
+/* 260713 */
 .metar_info,
 .met_report_info,
 .taf_info {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     text-align: start;
-    align-content: center;
     padding: 8px;
+    list-style: none;
+    margin: 0;
+}
+
+/* 260713 */
+.metar_info > li,
+.met_report_info > p,
+.taf_info > p {
+    margin: 0;
+    line-height: 1.5;
+    color: #222;
+}
+
+/* 260713 */
+.metar_info > li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* 260713 */
+.metar_info > li > p {
+    width: 85%;
+    margin: 0;
+    line-height: inherit;
+}
+
+/* 260713 */
+.metar_flag {
+    width: 15%;
+    white-space: nowrap;
+    text-align: center;
+    border-left: 1px solid #ddd;
 }
 
 
